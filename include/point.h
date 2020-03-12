@@ -33,6 +33,6 @@ void free_Point(Point* this);
 /**
  * Testing function
  */
-void test_Point();
+void Point_test();
 
 #endif

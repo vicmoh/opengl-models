@@ -14,9 +14,12 @@
 // My libraries
 #include "dynamic_string.h"
 #include "file_reader.h"
+#include "point.h"
+#include "model.h"
 
 // Show print if debug is true.
 #define DEBUG false
+#define SHOW_TEST true
 
 // Window size.
 #define WINDOW_SIZE 512
@@ -38,8 +41,8 @@ void display() {
 /**
  * Read the keyboard, when q is pressed, exit the program.
  * @param key of the keyboard key that is pressed.
- * @param x
- * @param y
+ * @param x of cursor
+ * @param y of cursor
  */
 void keyboard(unsigned char key, int x, int y) {
   switch (key) {
@@ -50,11 +53,24 @@ void keyboard(unsigned char key, int x, int y) {
   }
 }
 
+/**
+ * Testing function.
+ */
+void test() {
+  print("Running script...");
+  print("__________Testign__________");
+  Point_test();
+  Model_test();
+  print("___________________________"); 
+  print("Script complete.");
+}
+
 /* -------------------------------------------------------------------------- */
 /*                      Main Function to run the program                      */
 /* -------------------------------------------------------------------------- */
 
 int main(int argc, char** argv) {
+  if (SHOW_TEST) test();
   print("Running script...\n");
 
   // If no argument print the feedback.
