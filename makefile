@@ -17,7 +17,7 @@ LIB_DIR=./lib/include/
 
 LIB=./lib/shared/*.so
 INC=-I$(INC_DIR) -I$(LIB_DIR)
-FLAGS=gcc -Wno-nullability-completeness
+FLAGS=clang -Wno-nullability-completeness
 
 FILE=''
 

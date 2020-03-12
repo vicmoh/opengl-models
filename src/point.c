@@ -5,7 +5,7 @@ Point* new_PointOf(double x, double y, double z) {
   this->x = x;
   this->y = y;
   this->z = z;
-  this->toString = $("{\"x\": ", _(x), ", \"y\": ", _(y), "\"z\": ", _(z), "}");
+  this->toString = $("{\"x\": ", _(x), ", \"y\": ", _(y), ", \"z\": ", _(z), "}");
   return this;
 }
 

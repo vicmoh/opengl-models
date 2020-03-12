@@ -61,7 +61,7 @@ void test() {
   print("__________Testign__________");
   Point_test();
   Model_test();
-  print("___________________________"); 
+  print("___________________________");
   print("Script complete.");
 }
 

@@ -29,4 +29,9 @@ Model* new_Model(String filePath);
  */
 void free_Model(Model* self);
 
+/**
+ * Test the model object.
+ */
+void Model_test();
+
 #endif

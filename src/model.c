@@ -34,20 +34,31 @@ Model* new_Model(String filePath) {
         this->numOfFaces = atof(lineSplit->list[2]);
       else if (strcmp("vertex", lineSplit->list[1]) == 0)
         this->numOfVertices = atof(lineSplit->list[2]);
+      free_Splitter(lineSplit);
+      dispose(eachLine);
+      continue;
     }
 
     // Check if the header ended.
     if (strcmp("end_header", eachLine) == 0) {
       isEndHeader = true;
       free_Splitter(lineSplit);
+      dispose(eachLine);
       continue;
     }
+
+    // Free.
+    free_Splitter(lineSplit);
     dispose(eachLine);
   }
 
+  // Debug the number of vertices and faces.
+  if (DEBUG)
+    print("vert#: ", _(this->numOfVertices), ", faces#:", _(this->numOfFaces));
+
   // Free mem.
   free_FileReader(fs);
-  return null;
+  return this;
 }
 
 void free_Model(Model* this) {
