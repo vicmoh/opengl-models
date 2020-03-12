@@ -1,0 +1,71 @@
+CIS*4800 - Assignment 4 - File Formats and Shadows
+--------------------------------------------------
+Due: Friday, March 20
+
+Read a 3D object in from a file and create a fake shadow for the object.
+
+The q key should exit your program.
+
+Part I - Load an Object from a File
+-----------------------------------
+Read an 3D object model from an input file. The file is in the PLY
+format. Build the model from the description in the file and display
+it using OpenGL. Put a light above and to the side of the model.
+
+The PLY files are ASCII. Write the code to read the file and
+store the polygon information.
+
+Pick a neutral colour for the object. Calculate surface normals
+for each polygon. Make sure the object fits in the display window.
+
+Sample PLY files are available on the Courselink page.
+
+Read the name of the file from the command line:
+	./a4 file.ply
+
+PLY models are from https://people.sc.fsu.edu/~jburkardt/data/ply/ply.html.
+
+
+Part II - Moving Object
+-----------------------
+Make the object rotate around the y axis.  Have the object at a speed
+that it is easy to see. It should be possible to see the surfaces of
+the object become lighter when the light is facing them. Choose lighting
+parameters that do not make the scene too bright or too dark to see clearly.
+
+
+Part III - Fake Shadows
+-----------------------
+Create a shadow for the cube using Jim Blinn Fake Shadows. Make the shadow
+a solid dark gray colour.  The shadow should rotate beneath the object
+as it  moves.
+
+Make sure the shadow is easily visible. Don't draw a dark shadow
+on a black background.
+
+You can choose to create local or infinite shadows.
+
+The initial position of the shadow may not be correct using the standard
+transformation matrix. You may need to change the orientation of the shadow
+for it to appear correct.
+
+
+Handin Notes
+------------
+Submit the assignment using the dropbox for assignment 4 in Courselink.
+
+Include a readme.txt which contains your student number, and a short
+description of any parts of the program which do not function correctly.
+
+Your code must run on the Macs in Thorn. 2420.
+
+Submit your source files necessary to compile your code, a makefile that
+will compile the code, and any other file necessary to build the project.
+The assignment will be compiled following these steps by:
+        -unpacking your submission
+        -typing make
+ 	-run a4 from the command line (./a4 <file.ply>)
+Any executables in the directory will be removed before make is run.
+
+
+

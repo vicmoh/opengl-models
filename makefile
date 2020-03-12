@@ -1,0 +1,44 @@
+
+all: compile run
+
+# framework information for older version of MACOS
+#INCLUDES = -F/System/Library/Frameworks -framework OpenGL -framework GLUT -lm
+
+# frameworks for newer MACOS, where include files are moved 
+INCLUDES = -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/ -framework OpenGL -framework GLUT -lm -Wno-deprecated-declarations
+
+TARGET = -mmacosx-version-min=10.8
+
+SRC_DIR=./src/
+INC_DIR=./include/
+BIN_DIR=./bin/
+TEST_DIR=./test/
+LIB_DIR=./lib/portable-string/include/
+
+LIB=./lib/portable-string/shared/*.so
+INC=-I$(INC_DIR) -I$(LIB_DIR) 
+FLAGS=gcc -Wall -std=c11 -Wno-nullability-completeness
+
+FILE=''
+
+# Compile the C code.
+compile:
+	$(FLAGS) $(SRC_DIR)*.c $(INC) -o $(BIN_DIR)run $(INCLUDES) $(LIB) $(TARGET) 
+
+# Run the program.
+run:
+	$(BIN_DIR)run $(FILE)
+
+# Test the program.
+sure:
+	$(FLAGS) $(LIB) $(TEST_DIR)*.c  $(INC) -o $(BIN_DIR)test $(INCLUDES) $(TARGET) 
+	$(BIN_DIR)test
+
+# Quick git commit and push.
+m=[AUTO]
+git:
+	git add -A
+	git commit -m "$(m)"
+	git push
+
+
