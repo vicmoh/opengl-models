@@ -17,7 +17,7 @@ LIB_DIR=./lib/portable-string/include/
 
 LIB=./lib/portable-string/shared/*.so
 INC=-I$(INC_DIR) -I$(LIB_DIR) 
-FLAGS=gcc -Wall -std=c11 -Wno-nullability-completeness
+FLAGS=gcc -Wall -Wno-nullability-completeness
 
 FILE=''
 
@@ -31,8 +31,11 @@ run:
 
 # Test the program.
 sure:
-	$(FLAGS) $(LIB) $(TEST_DIR)*.c  $(INC) -o $(BIN_DIR)test $(INCLUDES) $(TARGET) 
+	$(FLAGS) $(TEST_DIR)*.c $(LIB) $(INC) -o $(BIN_DIR)test $(INCLUDES) $(TARGET) 
 	$(BIN_DIR)test
+
+clean:
+	rm ./bin/*
 
 # Quick git commit and push.
 m=[AUTO]
