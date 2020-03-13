@@ -4,8 +4,8 @@ Model* __new_Model() {
   Model* this = malloc(sizeof(Model));
   this->faceList = 0;
   this->vertices = 0;
-  this->faceList = null;
-  this->vertices = null;
+  this->faceList = new_Array(free);
+  this->vertices = new_Array(free_Point);
   return this;
 }
 
@@ -17,8 +17,8 @@ Model* new_Model(String filePath) {
   if (fs == null) return null;
   Model* this = __new_Model();
 
-  this->numOfFaces = 0;
-  this->numOfVertices = 0;
+  int faceCounter = 0;
+  int vertexCounter = 0;
   bool isEndHeader = false;
 
   // Get through each file.
@@ -45,6 +45,23 @@ Model* new_Model(String filePath) {
       free_Splitter(lineSplit);
       dispose(eachLine);
       continue;
+    }
+
+    // Parse the face and vertex
+    if (isEndHeader) {
+      if (this->numOfVertices > vertexCounter) {
+        vertexCounter++;
+        if (DEBUG) print("vertexCounter: ", _(vertexCounter));
+        Splitter* vertexData = new_Splitter(eachLine, " ");
+        Array_add(this->vertices, new_PointOf(atof(vertexData->list[0]),
+                                              atof(vertexData->list[1]),
+                                              atof(vertexData->list[2])));
+        free_Splitter(vertexData);
+      } else if (this->numOfFaces > faceCounter) {
+        faceCounter++;
+        if (DEBUG) print("faceCounter: ", _(faceCounter));
+        Array_add(this->faceList, $(eachLine));
+      }
     }
 
     // Free.
