@@ -1,7 +1,7 @@
 /**********************************************************
  * @author Vicky Mohammad
  * Copyright 2017, Vicky Mohammad, All rights reserved.
- * https://github.com/vicmoh/DynamicStringAPI
+ * https://github.com/vicmoh/dynamic-string-api
  **********************************************************/
 
 #ifndef DYNAMIC_STRING_H
@@ -39,6 +39,7 @@
 
 // Helper functionality.
 #define $(...) __newString(__VA_ARGS__, NULL)
+#define $$(var, ...) free(var); var = __newString(__VA_ARGS__, NULL)
 #define dispose(...) __multipleFree(__VA_ARGS__, NULL)
 #define loop(index, start, end) for (int index = start; index <= end; index++)
 #define free(val)             \
@@ -137,11 +138,19 @@ char* __numberToString(int numOfArgs, ...);
 bool isStringNumberFormat(const char* toBeChecked);
 
 /**
+ * Compare two string of both string are equal.
+ * @param a of the first string to be compared.
+ * @param b of the second string.
+ * @return true if string is equal, else return false.
+ */
+bool isStringEqual(const char* a, const char* b);
+
+/**
  * Convert string to lower case.
  * @param toBeConverted.
  * @return allocated string. Return NULL if failed.
  */
-char* stringtoLowerCase(const char* toBeConverted);
+char* stringToLowerCase(const char* toBeConverted);
 
 /**
  * Convert string to upper case.

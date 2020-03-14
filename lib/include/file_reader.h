@@ -1,7 +1,7 @@
 /**********************************************************
  * @author Vicky Mohammad
  * Copyright 2017, Vicky Mohammad, All rights reserved.
- * https://github.com/vicmoh/DynamicStringAPI
+ * https://github.com/vicmoh/dynamic-string-api
  **********************************************************/
 
 #ifndef FILE_READER_H

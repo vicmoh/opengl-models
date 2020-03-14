@@ -31,11 +31,11 @@ Model* new_Model(String filePath) {
     Splitter* lineSplit = new_Splitter(eachLine, " ");
 
     // Determine the number of faces and vertex.
-    if (strcmp("element", lineSplit->list[0]) == 0) {
-      if (strcmp("face", lineSplit->list[1]) == 0)
-        this->numOfFaces = atof(lineSplit->list[2]);
-      else if (strcmp("vertex", lineSplit->list[1]) == 0)
-        this->numOfVertices = atof(lineSplit->list[2]);
+    if (strcmp("element", lineSplit->at[0]) == 0) {
+      if (strcmp("face", lineSplit->at[1]) == 0)
+        this->numOfFaces = atof(lineSplit->at[2]);
+      else if (strcmp("vertex", lineSplit->at[1]) == 0)
+        this->numOfVertices = atof(lineSplit->at[2]);
       free_Splitter(lineSplit);
       dispose(eachLine);
       continue;
@@ -55,9 +55,9 @@ Model* new_Model(String filePath) {
         vertexCounter++;
         if (DEBUG) print("vertexCounter: ", _(vertexCounter));
         Splitter* vertexData = new_Splitter(eachLine, " ");
-        Array_add(this->vertices, new_PointOf(atof(vertexData->list[0]),
-                                              atof(vertexData->list[1]),
-                                              atof(vertexData->list[2])));
+        Array_add(this->vertices,
+                  new_PointOf(atof(vertexData->at[0]), atof(vertexData->at[1]),
+                              atof(vertexData->at[2])));
         free_Splitter(vertexData);
       } else if (this->numOfFaces > faceCounter) {
         faceCounter++;

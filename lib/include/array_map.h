@@ -1,7 +1,7 @@
 /**********************************************************
  * @author Vicky Mohammad
  * Copyright 2017, Vicky Mohammad, All rights reserved.
- * https://github.com/vicmoh/DynamicStringAPI
+ * https://github.com/vicmoh/dynamic-string-api
  **********************************************************/
 
 #ifndef ARRAY_MAP_H
@@ -77,7 +77,7 @@ void __Array_addMultipleData(Array* self, ...);
 void* Array_get(Array* self, int index);
 
 /**
- * Remove the data and the position container. If self
+ * Remove the data and the position container. If this
  * is called, the array will be resized and the
  * data will be repositioned.
  * @param self array object.
@@ -160,7 +160,7 @@ void* Map_get(Map* self, const char* key);
 
 /**
  * Remove the data in the key.
- * self also delete and free the data.
+ * This also delete and free the data.
  * @param self map object.
  * @param key of the data that will be delete.
  */
@@ -168,7 +168,7 @@ void Map_remove(Map* self, const char* key);
 
 /**
  * Get the index of the map data.
- * self is mostly used to loop through get each data.
+ * This is mostly used to loop through get each data.
  * @param self map object.
  * @param index of the data position.
  */

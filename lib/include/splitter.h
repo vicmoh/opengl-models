@@ -1,7 +1,7 @@
 /**********************************************************
  * @author Vicky Mohammad
  * Copyright 2017, Vicky Mohammad, All rights reserved.
- * https://github.com/vicmoh/DynamicStringAPI
+ * https://github.com/vicmoh/dynamic-string-api
  **********************************************************/
 
 #ifndef SPLITTER_H
@@ -13,7 +13,7 @@
 #include <string.h>
 
 typedef struct {
-  char** list;
+  char** at;
   unsigned int length;
   void* __private__;
 } Splitter;
@@ -22,12 +22,12 @@ typedef struct {
  * Create new object to split a string.
  * @param toBeSplit of the string.
  * @param delimiter of the split.
- * @return self allocated object.
+ * @return the allocated object.
  */
 Splitter* new_Splitter(char* toBeSplit, const char* delimiter);
 
 /**
- * Free the self object.
+ * Free the object.
  * @param self object including the attribute.
  */
 void free_Splitter(Splitter* self);
