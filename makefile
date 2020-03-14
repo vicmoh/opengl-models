@@ -47,4 +47,6 @@ git:
 	git commit -m "$(m)"
 	git push
 
-
+portable-string:
+	cp -rf ../portable-string/lib/include ./lib/
+	cp -rf ../portable-string/lib/shared ./lib/

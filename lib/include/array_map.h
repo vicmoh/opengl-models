@@ -79,43 +79,14 @@ void* Array_get(Array* self, int index);
 /**
  * Remove the data and the position container. If this
  * is called, the array will be resized and the
- * data will be repositioned.
+ * data will be repositioned. Hence, there will be 1 less data.
  * @param self array object.
- * @param index of the position where the data and index
+ * @param index of the position where the index
  * container will be removed.
+ * @return the data at the index.
  */
-void Array_remove(Array* self, int index);
+void* Array_pop(Array* self, int index);
 
-/**
- * A functional programming inspired from javascript. Reduce to one
- * value from the array.
- * @param self array object.
- * @param callback of with param of [total], [theElement], [optional index],
- * [optional theArray]
- * @param initialValue of the starting value.
- * @return the reduce single value.
- */
-void* Array_reducer(Array* self, void* initialValue, void* (*callback)());
-
-/**
- * A functional programming inspired from javascript. Altered each object
- * value in the array.
- * @param self array object.
- * @param callback of with param of [theElement], [optional index], [optional
- * theArray].
- * @return A new allocated array that has been altered.
- */
-Array* Array_mapper(Array* self, void(destroyer)(), void* (*callback)());
-
-/**
- * A functional programming inspired from javascript. Filter the objects
- * in the array.
- * @param self array object.
- * @param callback of with param of [theElement], [optional index], [optional
- * theArray].
- * @return A new allocated array that has been filtered.
- */
-Array* Array_filter(Array* self, void(destroyer)(), void* (*callback)());
 
 /* -------------------------------------------------------------------------- */
 /*                                  Map class                                 */
@@ -144,12 +115,25 @@ Map* new_Map(void (*destroyer)());
 void free_Map(Map* self);
 
 /**
- * Add data to map object.
+ * Add data to map object. If data already exist, then
+ * it will free and put the data.
  * @param self map object.
- * @param key of the value to ba added and retrieved.
- * @param toBeAdded of the data to the map.
+ * @param key of where the data will be put.
+ * @param toBeAdded of the data that will be put.
  */
-void Map_add(Map* self, const char* key, void* toBeAdded);
+void Map_put(Map* self, const char* key, void* toBeAdded);
+
+/**
+ * Replace data to the map object. If the data already 
+ * exist, it will replace the data. However, it will not 
+ * free that data. Instead, it will return it.
+ * @param self the map object.
+ * @param key of where the data will be placed.
+ * @param toBeAdded of the data that will be placed.
+ * @return the data if exist. If it does not exist, 
+ * it will return null.
+ */
+void* Map_replace(Map* self, const char* key, void* toBeAdded);
 
 /**
  * Get the map data from the key string value.
@@ -167,11 +151,11 @@ void* Map_get(Map* self, const char* key);
 void Map_remove(Map* self, const char* key);
 
 /**
- * Get the index of the map data.
- * This is mostly used to loop through get each data.
+ * Get the data from the index table of the map object.
+ * This is mostly used to loop through and get each data.
  * @param self map object.
- * @param index of the data position.
+ * @param index of the data position of the table.
  */
-void* Map_getFromIndex(Map* self, int index);
+void* Map_getAt(Map* self, int index);
 
 #endif

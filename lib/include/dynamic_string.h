@@ -43,8 +43,7 @@
 #define dispose(...) __multipleFree(__VA_ARGS__, NULL)
 #define loop(index, start, end) for (int index = start; index <= end; index++)
 #define free(val)             \
-  if (val != NULL) free(val); \
-  val = NULL
+  if (val != NULL) free(val);
 #define numberToString(...) \
   __numberToString(__ARGS(__VA_ARGS__), (double)__VA_ARGS__)
 #define _(...) __numberToString(__ARGS(__VA_ARGS__), (double)__VA_ARGS__)
