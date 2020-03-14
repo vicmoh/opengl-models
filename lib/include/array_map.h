@@ -87,6 +87,13 @@ void* Array_get(Array* self, int index);
  */
 void* Array_pop(Array* self, int index);
 
+/**
+ * Get the array length.
+ * @param self array object.
+ * @return the number of data in the array.
+ */
+int Array_getLength(Array* self);
+
 
 /* -------------------------------------------------------------------------- */
 /*                                  Map class                                 */

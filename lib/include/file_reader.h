@@ -32,7 +32,7 @@ void free_FileReader(FileReader* self);
 
 /**
  * Get number of lines in the file.
- * @param self @FileReader object.
+ * @param self FileReader object.
  * @return the total lines in file.
  */
 int FileReader_getLength(FileReader* self);

@@ -98,5 +98,10 @@ void Model_test() {
   print("Testing the parsing of the ant.ply model.");
   Model* test = new_Model("./assets/ant.ply");
   print("The ant model parsed: ", Model_toString(test));
+  print("Printing the result of the all the vertex...");
+  for_in(next, test->vertices)
+      print(((Point*)(Array_get(test->vertices, next)))->toString);
+  if (test->numOfVertices == test->vertices->length) print("Vertices number match!");
+  if (test->numOfFaces == test->faceList->length) print("Faces number match!");
   free_Model(test);
 }
