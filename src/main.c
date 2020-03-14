@@ -14,8 +14,8 @@
 // My libraries
 #include "dynamic_string.h"
 #include "file_reader.h"
-#include "point.h"
 #include "model.h"
+#include "point.h"
 
 // Show print if debug is true.
 #define DEBUG false

@@ -6,17 +6,19 @@ Model* __new_Model() {
   this->vertices = 0;
   this->faceList = new_Array(free);
   this->vertices = new_Array(free_Point);
+  this->toString = $("");
   return this;
 }
 
 Model* new_Model(String filePath) {
-  const bool DEBUG = true;
+  const bool DEBUG = false;
 
   // Initialize the data.
   FileReader* fs = new_FileReader(filePath);
   if (fs == null) return null;
   Model* this = __new_Model();
 
+  // Initialize
   int faceCounter = 0;
   int vertexCounter = 0;
   bool isEndHeader = false;
@@ -25,7 +27,7 @@ Model* new_Model(String filePath) {
   for_in(next, fs) {
     String eachLine = FileReader_getLineAt(fs, next);
     if (eachLine == null) continue;
-    if (DEBUG) print("Line[", _(next), "]: ", $(eachLine));
+    if (DEBUG) print("Line[", _(next), "]: ", eachLine);
     Splitter* lineSplit = new_Splitter(eachLine, " ");
 
     // Determine the number of faces and vertex.
@@ -78,13 +80,23 @@ Model* new_Model(String filePath) {
   return this;
 }
 
+String Model_toString(Model* this) {
+  free(this->toString);
+  this->toString = $("FaceList#: ", _(this->numOfFaces),
+                     ", vertices#: ", _(this->numOfVertices));
+  return this->toString;
+}
+
 void free_Model(Model* this) {
   if (this == null) return;
+  free(this->toString);
   free_Array(this->faceList);
   free_Array(this->vertices);
 }
 
 void Model_test() {
+  print("Testing the parsing of the ant.ply model.");
   Model* test = new_Model("./assets/ant.ply");
+  print("The ant model parsed: ", Model_toString(test));
   free_Model(test);
 }
