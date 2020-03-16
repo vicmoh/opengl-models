@@ -43,13 +43,13 @@ void free_Splitter(Splitter* self);
 char* Splitter_getSplitAt(Splitter* self, int position);
 
 /**
- * Get the multple splits string from the split possition.
+ * Get the multple splits string from the split position.
  * @param self object.
  * @param startPosition of split included. Index start at zero.
  * @param endPosition of split includeed. Index start at zero.
  */
-char* Splitter_getMultipleSplits(Splitter* self, unsigned int startPosition,
-                                 unsigned int endPosition);
+char* Splitter_getMultiSplits(Splitter* self, unsigned int startPosition,
+                              unsigned int endPosition);
 
 /**
  * Search the splitted string by index or count.
@@ -60,5 +60,12 @@ char* Splitter_getMultipleSplits(Splitter* self, unsigned int startPosition,
  */
 int Splitter_search(Splitter* self, const char* search,
                     bool trueIfIndexSearch_falseIfCounting);
+
+/**
+ * To string the object of the splitter object.
+ * @param self the splitter object.
+ * @return the string of the splitter object.
+ */
+char* Splitter_toString(Splitter* self);
 
 #endif

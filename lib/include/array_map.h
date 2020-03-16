@@ -19,7 +19,8 @@
 
 // Param preprocessor
 #define for_in(x, object) for (int x = 0; x < (object->length); x++)
-#define Array_addMultiple(...) __Array_addMultipleData(__VA_ARGS__, NULL)
+#define Array_addMultiple(...) __Array_addMultiple(__VA_ARGS__, NULL)
+#define Garbage_collect(...) __Garbage_collect(__VA_ARGS__, NULL)
 
 /* -------------------------------------------------------------------------- */
 /*                  Struct to hold the data for array and map                 */
@@ -34,10 +35,13 @@ typedef struct {
 /*                                 Array class                                */
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
+typedef struct __Array__ {
   unsigned int length;
   ArrayMapData* index;
   void (*destroyer)();
+  void (*add)(struct __Array__*, void*);
+  void* (*get)(struct __Array__*, int);
+  void* (*pop)(struct __Array__*, int);
 } Array;
 
 /**
@@ -67,7 +71,7 @@ void Array_add(Array* self, void* toBeAdded);
  * @param self array of the data going to be added to.
  * @param ... are multiple data.
  */
-void __Array_addMultipleData(Array* self, ...);
+void __Array_addMultiple(Array* self, ...);
 
 /**
  * Get the data from index position.
@@ -92,19 +96,23 @@ void* Array_pop(Array* self, int index);
  * @param self array object.
  * @return the number of data in the array.
  */
-int Array_getLength(Array* self);
-
+unsigned int Array_getLength(Array* self);
 
 /* -------------------------------------------------------------------------- */
 /*                                  Map class                                 */
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
+typedef struct __Map__ {
   unsigned int tableSize;
   ArrayMapData** table;
   void (*destroyer)();
   Array* array;
   unsigned int length;
+  void (*put)(struct __Map__*, const char*, void*);
+  void* (*replace)(struct __Map__*, const char*, void*);
+  void* (*get)(struct __Map__*, const char*);
+  void (*remove)(struct __Map__*, const char*);
+  void* (*getAt)(struct __Map__*, int);
 } Map;
 
 /**
@@ -131,13 +139,13 @@ void free_Map(Map* self);
 void Map_put(Map* self, const char* key, void* toBeAdded);
 
 /**
- * Replace data to the map object. If the data already 
- * exist, it will replace the data. However, it will not 
+ * Replace data to the map object. If the data already
+ * exist, it will replace the data. However, it will not
  * free that data. Instead, it will return it.
  * @param self the map object.
  * @param key of where the data will be placed.
  * @param toBeAdded of the data that will be placed.
- * @return the data if exist. If it does not exist, 
+ * @return the data if exist. If it does not exist,
  * it will return null.
  */
 void* Map_replace(Map* self, const char* key, void* toBeAdded);
@@ -164,5 +172,41 @@ void Map_remove(Map* self, const char* key);
  * @param index of the data position of the table.
  */
 void* Map_getAt(Map* self, int index);
+
+/**
+ * Get the length of the data put on this map.
+ * @param self the map object.
+ * @return the size of the map.
+ */
+unsigned int Map_getLength(Map* self);
+
+/* -------------------------------------------------------------------------- */
+/*                              Garbage collector                             */
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+  Map* memory;
+} Garbage;
+
+/**
+ * Creates a new garbage collector.
+ * @param sweeper function for sweeping the collected garbage.
+ * @return Garbage collector for collecting.
+ */
+Garbage* new_Garbage(void (*sweeper)());
+
+/**
+ * Sweep and free the garbage.
+ * @param self the garbage object.
+ */
+void Garbage_sweep(Garbage* self);
+
+/**
+ * The garbage to be collected.
+ * @param self garbage object.
+ * @param toBeCollected of the memory.
+ * @return the collected garbage.
+ */
+void* __Garbage_collect(Garbage* self, ...);
 
 #endif

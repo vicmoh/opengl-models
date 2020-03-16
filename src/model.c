@@ -4,14 +4,13 @@ Model* __new_Model() {
   Model* this = malloc(sizeof(Model));
   this->faceList = 0;
   this->vertices = 0;
-  this->faceList = new_Array(free);
+  this->faceList = new_Array(free_Splitter);
   this->vertices = new_Array(free_Point);
-  this->toString = $("");
   return this;
 }
 
 Model* new_Model(String filePath) {
-  const bool DEBUG = false;
+  const bool DEBUG = true;
 
   // Initialize the data.
   FileReader* fs = new_FileReader(filePath);
@@ -27,7 +26,7 @@ Model* new_Model(String filePath) {
   for_in(next, fs) {
     String eachLine = FileReader_getLineAt(fs, next);
     if (eachLine == null) continue;
-    if (DEBUG) print("Line[", _(next), "]: ", eachLine);
+    if (DEBUG) print("Line[", _(next), "]: ", $(eachLine));
     Splitter* lineSplit = new_Splitter(eachLine, " ");
 
     // Determine the number of faces and vertex.
@@ -62,7 +61,7 @@ Model* new_Model(String filePath) {
       } else if (this->numOfFaces > faceCounter) {
         faceCounter++;
         if (DEBUG) print("faceCounter: ", _(faceCounter));
-        Array_add(this->faceList, $(eachLine));
+        Array_add(this->faceList, new_Splitter(eachLine, " "));
       }
     }
 
@@ -81,10 +80,8 @@ Model* new_Model(String filePath) {
 }
 
 String Model_toString(Model* this) {
-  free(this->toString);
-  this->toString = $("FaceList#: ", _(this->numOfFaces),
-                     ", vertices#: ", _(this->numOfVertices));
-  return this->toString;
+  return $("FaceList#: ", _(this->numOfFaces),
+           ", vertices#: ", _(this->numOfVertices));
 }
 
 void free_Model(Model* this) {
@@ -96,12 +93,30 @@ void free_Model(Model* this) {
 
 void Model_test() {
   print("Testing the parsing of the ant.ply model.");
+  Garbage* gcStr = new_Garbage(free);
   Model* test = new_Model("./assets/ant.ply");
-  print("The ant model parsed: ", Model_toString(test));
+  // Testing the model.
+  print("The ant model parsed: ", Garbage_collect(gcStr, Model_toString(test)));
   print("Printing the result of the all the vertex...");
-  for_in(next, test->vertices)
-      print(((Point*)(Array_get(test->vertices, next)))->toString);
-  if (test->numOfVertices == test->vertices->length) print("Vertices number match!");
+
+  // Printing all the points
+  for_in(next, test->vertices) print(
+      "Vertex[", _(next), "]: ",
+      Garbage_collect(gcStr, Point_toString(Array_get(test->vertices, next))));
+
+  // Printing all the facelist
+  for_in(next, test->faceList)
+      print("Face[", _(next), "]: ",
+            Garbage_collect(
+                gcStr, Splitter_toString(Array_get(test->faceList, next))));
+
+  // Determine of the vertices number is the same after parsed.
+  if (test->numOfVertices == test->vertices->length)
+    print("Vertices number match!");
+
+  // Determine if the face list number is the same after parsed
   if (test->numOfFaces == test->faceList->length) print("Faces number match!");
+
+  Garbage_sweep(gcStr);
   free_Model(test);
 }

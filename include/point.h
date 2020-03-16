@@ -5,7 +5,6 @@
 
 typedef struct {
   double x, y, z;
-  String toString;
 } Point;
 
 /**
@@ -28,7 +27,14 @@ Point* new_Point();
 /**
  * Destroyer of the point object.
  */
-void free_Point(Point* this);
+void free_Point(Point* self);
+
+/**
+ * To string of the point object.
+ * @param self of the point object
+ * @return of the point object string.
+ */
+String Point_toString(Point* self);
 
 /**
  * Testing function

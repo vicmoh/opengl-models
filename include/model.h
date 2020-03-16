@@ -9,7 +9,7 @@
 
 typedef struct {
   int numOfVertices, numOfFaces;
-  Array* faceList;  // Array of doubles.
+  Array* faceList;  // Array of  splits.
   Array* vertices;  // Array of points.
   String toString;
 } Model;

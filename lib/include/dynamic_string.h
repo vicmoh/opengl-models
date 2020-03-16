@@ -39,10 +39,12 @@
 
 // Helper functionality.
 #define $(...) __newString(__VA_ARGS__, NULL)
-#define $$(var, ...) free(var); var = __newString(__VA_ARGS__, NULL)
+#define $$(var, ...) \
+  free(var);         \
+  var = __newString(__VA_ARGS__, NULL)
 #define dispose(...) __multipleFree(__VA_ARGS__, NULL)
 #define loop(index, start, end) for (int index = start; index <= end; index++)
-#define free(val)             \
+#define free(val) \
   if (val != NULL) free(val);
 #define numberToString(...) \
   __numberToString(__ARGS(__VA_ARGS__), (double)__VA_ARGS__)
@@ -65,19 +67,22 @@
 /*                             Class Preprocessor                             */
 /* -------------------------------------------------------------------------- */
 
+#define CLASS(obj, param, init) \
+  obj* new_##obj param { obj* this = malloc(sizeof(obj)); init return this; }
+
 // Class preprocessor
-#define OBJECT void* _this
-#define THIS(object) object* this = _this
-#define CONSTRUCTOR(object, param, code) \
-  object* new_##object param {           \
-    object* this = new (object);         \
-    code return this;                    \
-  }
-#define CLASS(object, instance, constructor, function) \
-  typedef struct {                                     \
-    instance;                                          \
-  } object;                                            \
-  function constructor
+// #define OBJECT void* _this
+// #define THIS(object) object* this = _this
+// #define CONSTRUCTOR(object, param, code) \
+//   object* new_##object param {           \
+//     object* this = new (object);         \
+//     code return this;                    \
+//   }
+// #define CLASS(object, instance, constructor, function) \
+//   typedef struct {                                     \
+//     instance;                                          \
+//   } object;                                            \
+//   function constructor
 
 /* -------------------------------------------------------------------------- */
 /*                              Number Functions                              */
