@@ -110,7 +110,7 @@ void Model_test() {
             Garbage_collect(
                 gcStr, Splitter_toString(Array_get(test->faceList, next))));
 
-  // Determine of the vertices number is the same after parsed.
+  // Determine if the vertices number is the same after parsed.
   if (test->numOfVertices == test->vertices->length)
     print("Vertices number match!");
 
