@@ -4,8 +4,8 @@ Model* __new_Model() {
   Model* this = malloc(sizeof(Model));
   this->faceList = 0;
   this->vertices = 0;
-  this->faceList = new_Array(free_Splitter);
-  this->vertices = new_Array(free_Point);
+  this->faceList = new_Array(Splitter_free);
+  this->vertices = new_Array(Point_free);
   return this;
 }
 
@@ -13,8 +13,8 @@ Model* new_Model(String filePath) {
   const bool DEBUG = true;
 
   // Initialize the data.
-  FileReader* fs = new_FileReader(filePath);
-  if (fs == null) return null;
+  FileReader* file = new_FileReader(filePath);
+  if (file == null) return null;
   Model* this = __new_Model();
 
   // Initialize
@@ -23,27 +23,27 @@ Model* new_Model(String filePath) {
   bool isEndHeader = false;
 
   // Get through each file.
-  for_in(next, fs) {
-    String eachLine = FileReader_getLineAt(fs, next);
+  for_in(next, file) {
+    String eachLine = FileReader_getLineAt(file, next);
     if (eachLine == null) continue;
-    if (DEBUG) print("Line[", _(next), "]: ", $(eachLine));
+    if (DEBUG) print("Line[", _(next), "]: ", eachLine);
     Splitter* lineSplit = new_Splitter(eachLine, " ");
 
     // Determine the number of faces and vertex.
-    if (strcmp("element", lineSplit->at[0]) == 0) {
-      if (strcmp("face", lineSplit->at[1]) == 0)
+    if (isStringEqual("element", lineSplit->at[0])) {
+      if (isStringEqual("face", lineSplit->at[1]))
         this->numOfFaces = atof(lineSplit->at[2]);
-      else if (strcmp("vertex", lineSplit->at[1]) == 0)
+      else if (isStringEqual("vertex", lineSplit->at[1]))
         this->numOfVertices = atof(lineSplit->at[2]);
-      free_Splitter(lineSplit);
+      Splitter_free(lineSplit);
       dispose(eachLine);
       continue;
     }
 
     // Check if the header ended.
-    if (strcmp("end_header", eachLine) == 0) {
+    if (isStringEqual("end_header", eachLine)) {
       isEndHeader = true;
-      free_Splitter(lineSplit);
+      Splitter_free(lineSplit);
       dispose(eachLine);
       continue;
     }
@@ -57,7 +57,7 @@ Model* new_Model(String filePath) {
         Array_add(this->vertices,
                   new_PointOf(atof(vertexData->at[0]), atof(vertexData->at[1]),
                               atof(vertexData->at[2])));
-        free_Splitter(vertexData);
+        Splitter_free(vertexData);
       } else if (this->numOfFaces > faceCounter) {
         faceCounter++;
         if (DEBUG) print("faceCounter: ", _(faceCounter));
@@ -66,7 +66,7 @@ Model* new_Model(String filePath) {
     }
 
     // Free.
-    free_Splitter(lineSplit);
+    Splitter_free(lineSplit);
     dispose(eachLine);
   }
 
@@ -75,7 +75,7 @@ Model* new_Model(String filePath) {
     print("vert#: ", _(this->numOfVertices), ", faces#:", _(this->numOfFaces));
 
   // Free mem.
-  free_FileReader(fs);
+  FileReader_free(file);
   return this;
 }
 
@@ -87,8 +87,8 @@ String Model_toString(Model* this) {
 void free_Model(Model* this) {
   if (this == null) return;
   free(this->toString);
-  free_Array(this->faceList);
-  free_Array(this->vertices);
+  Array_free(this->faceList);
+  Array_free(this->vertices);
 }
 
 void Model_test() {

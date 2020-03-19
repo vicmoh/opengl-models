@@ -27,7 +27,7 @@ Point* new_Point();
 /**
  * Destroyer of the point object.
  */
-void free_Point(Point* self);
+void Point_free(Point* self);
 
 /**
  * To string of the point object.

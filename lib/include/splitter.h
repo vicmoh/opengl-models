@@ -30,7 +30,7 @@ Splitter* new_Splitter(char* toBeSplit, const char* delimiter);
  * Free the object.
  * @param self object including the attribute.
  */
-void free_Splitter(Splitter* self);
+void Splitter_free(Splitter* self);
 
 /**
  * Get the string at certain position

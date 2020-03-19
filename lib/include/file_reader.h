@@ -28,7 +28,7 @@ FileReader* new_FileReader(char* fileName);
  * Dispose the instance @FileReader memory.
  * @param self @FileReader object.
  */
-void free_FileReader(FileReader* self);
+void FileReader_free(FileReader* self);
 
 /**
  * Get number of lines in the file.

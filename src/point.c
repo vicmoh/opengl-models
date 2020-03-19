@@ -10,7 +10,7 @@ Point* new_PointOf(double x, double y, double z) {
 
 Point* new_Point() { return new_PointOf(0, 0, 0); }
 
-void free_Point(Point* this) { dispose(this); }
+void Point_free(Point* this) { dispose(this); }
 
 String Point_toString(Point* this) {
   return $("{\"x\": ", _(this->x, 4), ", \"y\": ", _(this->y, 4),
@@ -20,5 +20,5 @@ String Point_toString(Point* this) {
 void Point_test() {
   print("Testing the initializer for the point.");
   Point* point = new_PointOf(1, 2, 3);
-  free_Point(point);
+  Point_free(point);
 }

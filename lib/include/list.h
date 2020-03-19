@@ -18,14 +18,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * For each implementation for list to be able
+ * to loop each content easily.
+ *
+ * For example useage if list contains Strings:
+ *
+ * for_each(String, each, listOfString) { print(each); }
+ */
 #define for_each(type, var, list)                  \
   ListIterator __iter = List_createIterator(list); \
   type var = NULL;                                 \
   while ((var = List_nextElement(&__iter)) != NULL)
 
-/**********************************************************
- * object struct
- **********************************************************/
+/* -------------------------------------------------------------------------- */
+/*                                 List Struct                                */
+/* -------------------------------------------------------------------------- */
 
 typedef struct __ListNode__ {
   void* data;
@@ -44,9 +52,9 @@ typedef struct {
   void (*destroyer)();
 } List;
 
-/**********************************************************
- * list function
- **********************************************************/
+/* -------------------------------------------------------------------------- */
+/*                               List Functions                               */
+/* -------------------------------------------------------------------------- */
 
 /**
  * Create a new list.
@@ -67,7 +75,7 @@ ListNode* List_newNode(void* data);
  * the [destroyer] parameter is passed.
  * @param list to be freed.
  */
-void free_List(List* list);
+void List_free(List* list);
 
 /**
  * Insert a data to the front of the list.

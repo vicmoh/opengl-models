@@ -17,10 +17,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Param preprocessor
+#include "variadic.h"
+
+/**
+ * For in loop. Where it will loop based on the
+ * the length of the object. Works with Array, Map, Splitter,
+ * or any that contains attribute of length.
+ */
 #define for_in(x, object) for (int x = 0; x < (object->length); x++)
-#define Array_addMultiple(...) __Array_addMultiple(__VA_ARGS__, NULL)
-#define Garbage_collect(...) __Garbage_collect(__VA_ARGS__, NULL)
 
 /* -------------------------------------------------------------------------- */
 /*                  Struct to hold the data for array and map                 */
@@ -39,15 +43,12 @@ typedef struct __Array__ {
   unsigned int length;
   ArrayMapData* index;
   void (*destroyer)();
-  void (*add)(struct __Array__*, void*);
-  void* (*get)(struct __Array__*, int);
-  void* (*pop)(struct __Array__*, int);
 } Array;
 
 /**
  * Constructor to create new array object.
  * @param destroyer of the data to be deleted when
- * free_Array() is called. Can be null.
+ * Array_free() is called. Can be null.
  * @return a new allocated Array Object.
  */
 Array* new_Array(void (*destroyer)());
@@ -57,12 +58,12 @@ Array* new_Array(void (*destroyer)());
  * the destroyer for the @new_Array is passed.
  * @param self array to be freed.
  */
-void free_Array(Array* self);
+void Array_free(Array* self);
 
 /**
  * Add a data to array.
  * @param self Array where data is going to be added to.
- * @param toBeAdded data to the arrray.
+ * @param toBeAdded data to the arrray
  */
 void Array_add(Array* self, void* toBeAdded);
 
@@ -71,7 +72,8 @@ void Array_add(Array* self, void* toBeAdded);
  * @param self array of the data going to be added to.
  * @param ... are multiple data.
  */
-void __Array_addMultiple(Array* self, ...);
+void __Array_addMultiple(VARIADIC_PARAM);
+#define Array_addMultiple(...) __Array_addMultiple(VARIADIC_ARGS(__VA_ARGS__))
 
 /**
  * Get the data from index position.
@@ -108,17 +110,12 @@ typedef struct __Map__ {
   void (*destroyer)();
   Array* array;
   unsigned int length;
-  void (*put)(struct __Map__*, const char*, void*);
-  void* (*replace)(struct __Map__*, const char*, void*);
-  void* (*get)(struct __Map__*, const char*);
-  void (*remove)(struct __Map__*, const char*);
-  void* (*getAt)(struct __Map__*, int);
 } Map;
 
 /**
  * Create a new allocated hash map object.
  * @param destroyer of the data to be deleted when
- * free_Map() is called. Can be null.
+ * Map_free() is called. Can be null.
  * @return Allocated hash map object.
  */
 Map* new_Map(void (*destroyer)());
@@ -127,7 +124,7 @@ Map* new_Map(void (*destroyer)());
  * Free the map and data in the map if destroyer is set.
  * @param self map object.
  */
-void free_Map(Map* self);
+void Map_free(Map* self);
 
 /**
  * Add data to map object. If data already exist, then
@@ -207,6 +204,7 @@ void Garbage_sweep(Garbage* self);
  * @param toBeCollected of the memory.
  * @return the collected garbage.
  */
-void* __Garbage_collect(Garbage* self, ...);
+void* __Garbage_collect(VARIADIC_PARAM);
+#define Garbage_collect(...) __Garbage_collect(VARIADIC_ARGS(__VA_ARGS__))
 
 #endif

@@ -7,25 +7,71 @@
 #ifndef DYNAMIC_STRING_H
 #define DYNAMIC_STRING_H
 
-#include <ctype.h>
-#include <setjmp.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "variadic.h"
 
 /* -------------------------------------------------------------------------- */
-/*                          20 Parameter Preprocessor                         */
+/*                              Macros Shortcuts                              */
 /* -------------------------------------------------------------------------- */
 
-// Param preprocessor.
-#define __ARGS_SEQUENCE(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, \
-                        _13, _14, _15, _16, _17, _18, _19, _20, N, ...)    \
-  N
-#define __ARGS(...)                                                           \
-  __ARGS_SEQUENCE(__VA_ARGS__, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, \
-                  8, 7, 6, 5, 4, 3, 2, 1)
+/**
+ * Create a new allocated string.
+ *
+ * Usage example:
+ *
+ * String hello = $("Hello world!, my name is ", name, ".");
+ */
+#define $(...) __newString(VARIADIC_ARGS(__VA_ARGS__))
+
+/**
+ * Similar to $() tag except.
+ * It frees the var and then assigned the string.
+ *
+ * Useage example:
+ *
+ * $$(thisVarWillBeFreedAndThen, "concatenated string", "more string");
+ */
+#define $$(var, ...) \
+  free(var);         \
+  var = $(__VA_ARGS__)
+
+/**
+ * Used for number representation when using the string
+ * tag $(). This wrap with indicator in the string tag
+ * that it needs to be freed.
+ */
+#define _(...) __numberForString(__numberToString(VARIADIC_ARGS_NUMBER(__VA_ARGS__)))
+
+/*
+ * Print function that acts similar to the
+ * $() string tag.
+ */
+#define print(...) __print($(__VA_ARGS__))
+
+/**
+ * Multiple free in multiple paramaters.
+ * for example:
+ *
+ * dispose(freeThis, andThis, andSoOn);
+ */
+#define dispose(...) __multipleFree(VARIADIC_ARGS(__VA_ARGS__))
+
+/**
+ * Loop through range values. The first param is the index
+ * as int, the second param is the start index the third param
+ * is the end index.
+ *
+ * For example looping "num" 0 to 10.
+ *
+ * loop(num, 0, 10) { ... }
+ */
+#define loop(index, start, end) for (int index = start; index <= end; index++)
+
+/**
+ * Replace the normal free so that it checks
+ * for NULL before hand.
+ */
+#define free(val) \
+  if (val != NULL) free(val);
 
 /* -------------------------------------------------------------------------- */
 /*                          Main String Preprocessor                          */
@@ -36,20 +82,6 @@
 #define var void*
 #define null NULL
 #define Number double*
-
-// Helper functionality.
-#define $(...) __newString(__VA_ARGS__, NULL)
-#define $$(var, ...) \
-  free(var);         \
-  var = __newString(__VA_ARGS__, NULL)
-#define dispose(...) __multipleFree(__VA_ARGS__, NULL)
-#define loop(index, start, end) for (int index = start; index <= end; index++)
-#define free(val) \
-  if (val != NULL) free(val);
-#define numberToString(...) \
-  __numberToString(__ARGS(__VA_ARGS__), (double)__VA_ARGS__)
-#define _(...) __numberToString(__ARGS(__VA_ARGS__), (double)__VA_ARGS__)
-#define print(...) __print($(__VA_ARGS__))
 
 // Credit for lambda https://blog.noctua-software.com/c-lambda.html
 #define LAMBDA(varfunction) ({ varfunction function; })
@@ -62,27 +94,6 @@
   ((var >= 97 && var <= 122) || (var >= 65 && var <= 90))
 #define IS_NUMBER_RANGE(var) (var >= 48 && var <= 57)
 #define IS_VISIBLE_RANGE(var) (var >= 33 && var <= 126)
-
-/* -------------------------------------------------------------------------- */
-/*                             Class Preprocessor                             */
-/* -------------------------------------------------------------------------- */
-
-#define CLASS(obj, param, init) \
-  obj* new_##obj param { obj* this = malloc(sizeof(obj)); init return this; }
-
-// Class preprocessor
-// #define OBJECT void* _this
-// #define THIS(object) object* this = _this
-// #define CONSTRUCTOR(object, param, code) \
-//   object* new_##object param {           \
-//     object* this = new (object);         \
-//     code return this;                    \
-//   }
-// #define CLASS(object, instance, constructor, function) \
-//   typedef struct {                                     \
-//     instance;                                          \
-//   } object;                                            \
-//   function constructor
 
 /* -------------------------------------------------------------------------- */
 /*                              Number Functions                              */
@@ -114,7 +125,16 @@ void __print(char* val);
  * are string to be concatenated.
  * @return a new allocated string.
  */
-char* __newString(char* val, ...);
+char* __newString(VARIADIC_PARAM);
+
+/**
+ * This function is used for the _() tag.
+ * Which wrap the number string to determin
+ * if this string needs to be freed.
+ * @param val will be call with the __numberToString()
+ * function in macro.
+ */
+char* __numberForString(const char* val);
 
 /**
  * This function is so that you can free
@@ -123,7 +143,7 @@ char* __newString(char* val, ...);
  * @param val and the other variadic parameter
  * are the value to be freed.
  */
-void __multipleFree(void* val, ...);
+void __multipleFree(VARIADIC_PARAM);
 
 /**
  * Convert number to allocated string. Call using
@@ -132,7 +152,8 @@ void __multipleFree(void* val, ...);
  * @param secondArg is the int of the decimal places.
  * @return allocated string, must be free.
  */
-char* __numberToString(int numOfArgs, ...);
+char* __numberToString(VARIADIC_PARAM);
+#define numberToString(...) __numberToString(VARIADIC_ARGS(__VA_ARGS__))
 
 /**
  * Check if the string is in number format.
@@ -177,8 +198,8 @@ char* trimString(const char* toBeTrimmed);
  * @param endIndexToKeep.
  * @return allocated string. Return NULL if failed.
  */
-char* sliceString(const char* toBeSliced, unsigned int startIndexToKeep,
-                  unsigned int endIndexToKeep);
+char* substring(const char* toBeSliced, unsigned int startIndexToKeep,
+                unsigned int endIndexToKeep);
 
 /**
  * Get the char of a string.

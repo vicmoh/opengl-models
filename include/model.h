@@ -28,7 +28,7 @@ Model* new_Model(String filePath);
 /**
  * Destroy and free the model.
  */
-void free_Model(Model* self);
+void Model_free(Model* self);
 
 /**
  * Test the model object.
