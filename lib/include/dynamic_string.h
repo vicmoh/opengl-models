@@ -134,7 +134,7 @@ char* __newString(VARIADIC_PARAM);
  * @param val will be call with the __numberToString()
  * function in macro.
  */
-char* __numberForString(const char* val);
+char* __numberForString(char* val);
 
 /**
  * This function is so that you can free
@@ -153,7 +153,7 @@ void __multipleFree(VARIADIC_PARAM);
  * @return allocated string, must be free.
  */
 char* __numberToString(VARIADIC_PARAM);
-#define numberToString(...) __numberToString(VARIADIC_ARGS(__VA_ARGS__))
+#define numberToString(...) __numberToString(VARIADIC_ARGS_NUMBER(__VA_ARGS__))
 
 /**
  * Check if the string is in number format.
