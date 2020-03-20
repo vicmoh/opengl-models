@@ -12,10 +12,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "array_map.h"
+#include "dynamic_string.h"
+
 typedef struct {
   char** at;
   unsigned int length;
-  void* __private__;
 } Splitter;
 
 /**
@@ -40,7 +42,7 @@ void Splitter_free(Splitter* self);
  * Position starts at zero like an array.
  * @return Allocated string.
  */
-char* Splitter_getSplitAt(Splitter* self, int position);
+char* Splitter_at(Splitter* self, int position);
 
 /**
  * Get the multple splits string from the split position.

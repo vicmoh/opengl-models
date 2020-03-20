@@ -186,6 +186,12 @@ typedef struct {
 } Garbage;
 
 /**
+ * Varirable for global grabage collecting.
+ * This is used mainly for string in a function.
+ */
+Garbage* __GARBAGE_COLLECTORS__;
+
+/**
  * Creates a new garbage collector.
  * @param sweeper function for sweeping the collected garbage.
  * @return Garbage collector for collecting.
@@ -206,5 +212,15 @@ void Garbage_sweep(Garbage* self);
  */
 void* __Garbage_collect(VARIADIC_PARAM);
 #define Garbage_collect(...) __Garbage_collect(VARIADIC_ARGS(__VA_ARGS__))
+
+/* -------------------------------------------------------------------------- */
+/*                          Global garbage collectors                         */
+/* -------------------------------------------------------------------------- */
+
+#define MEM_TRACK __GARBAGE_COLLECTORS__ = new_Garbage(free);
+#define MEM(...) Garbage_collect(__GARBAGE_COLLECTORS__, __VA_ARGS__)
+#define MEM_SWEEP                        \
+  Garbage_sweep(__GARBAGE_COLLECTORS__); \
+  __GARBAGE_COLLECTORS__ = NULL;
 
 #endif
