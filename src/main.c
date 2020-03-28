@@ -14,6 +14,7 @@
 // My libraries
 #include "dynamic_string.h"
 #include "file_reader.h"
+#include "gl_setup.h"
 #include "model.h"
 #include "point.h"
 
@@ -21,50 +22,230 @@
 #define DEBUG true
 #define SHOW_TEST false
 
-// Window size.
-#define WINDOW_SIZE 512
-
+// The patsed data file of PLY.
 Model* _parsedData;
 
-/**
- * OpenGL calls this to draw the screen.
- */
-void display() {
-  glClearColor(0.0, 0.0, 0.0, 1.0);
-  glClear(GL_COLOR_BUFFER_BIT);
-  glPointSize(1.0);
+/* flags used to control the appearance of the image */
+int GLSetup_lineDrawing = 1;    // draw polygons as solid or lines
+int GLSetup_lighting = 0;       // use diffuse and specular lighting
+int GLSetup_smoothShading = 0;  // smooth or flat shading
+int GLSetup_textures = 0;
+GLuint GLSetup_textureID[1];
 
-  /* draw individual pixels */
-  glBegin(GL_POINTS);
+// Colors
+const GLfloat BLUE[] = {0.0, 0.0, 1.0, 1.0};
+const GLfloat RED[] = {1.0, 0.0, 0.0, 1.0};
+const GLfloat GREEN[] = {0.0, 1.0, 0.0, 1.0};
+const GLfloat WHITE[] = {1.0, 1.0, 1.0, 1.0};
+
+// Points
+Point GLSetup_cameraPos = {.x = 0, .y = 0, .z = 0};
+
+/**
+ * Draw the face from multiple vertex.
+ * @param index of the face.
+ */
+void drawFace(int index) {
+  MEM_TRACK
+  Splitter* faceSplit = _parsedData->faceList->at[index];
+  if (isStringEqual(faceSplit->at[0], "3")) glBegin(GL_TRIANGLES);
+  if (isStringEqual(faceSplit->at[0], "4")) glBegin(GL_QUADS);
+  for_in(next, faceSplit) {
+    if (next == 0) continue;
+    int curPos = atoi(faceSplit->at[next]);
+    Point* curVertex = _parsedData->vertices->at[curPos];
+    glNormal3f(curVertex->x, curVertex->y, curVertex->z);
+    glVertex3f(curVertex->x, curVertex->y, curVertex->z);
+  }
   glEnd();
+  MEM_SWEEP
+}
+
+// /**
+//  * Draw Based on parsed data.
+//  */
+void draw() { for_in(next, _parsedData->faceList) drawFace(next); }
+
+/* -------------------------------------------------------------------------- */
+/*                              openGL functions                              */
+/* -------------------------------------------------------------------------- */
+
+void runOpenGL(int argc, char** argv) {
+  printf("Running with file: %s\n", argv[1]);
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
+  glutInitWindowSize(1024, 768);
+  glutCreateWindow(argv[0]);
+  printf("Running OpenGL Version: %s\n", glGetString(GL_VERSION));
+
+  // Draw
+  initLightSource();
+  glutReshapeFunc(reshapeWindow);
+  glutDisplayFunc(render);
+  glutKeyboardFunc(keyboardControl);
+  glutSpecialFunc(specialControl);
+  glutMotionFunc(mouseControl);
+
+  // Loop
+  glutMainLoop();
+}
+
+void reshapeWindow(int w, int h) {
+  glViewport(0, 0, w, h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(45.0, (GLfloat)w / (GLfloat)h, 1.0, 256.0 * 64);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+/*  Initialize material property and light source. */
+void initLightSource(void) {
+  GLfloat lightAmbient[] = {0.0, 0.0, 0.0, 1.0};
+  GLfloat lightDiffuse[] = {1.0, 1.0, 1.0, 1.0};
+  GLfloat lightSpecular[] = {1.0, 1.0, 1.0, 1.0};
+  GLfloat lightFullOff[] = {0.0, 0.0, 0.0, 1.0};
+  GLfloat lightFullOn[] = {1.0, 1.0, 1.0, 1.0};
+  GLfloat lightPosition[] = {1.0, 1.0, 1.0, 0.0};
+  /* if lighting is turned on then use ambient, diffuse and specular
+     lights, otherwise use ambient lighting only */
+  if (GLSetup_lighting == 1) {
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
+  } else {
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightFullOn);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightFullOff);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightFullOff);
+  }
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+  // Enable the light and depth
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_DEPTH_TEST);
+}
+
+void checkForVectorAndShaderCondition() {
+  /* draw surfaces as either smooth or flat shaded */
+  if (GLSetup_smoothShading == 1)
+    glShadeModel(GL_SMOOTH);
+  else
+    glShadeModel(GL_FLAT);
+  /* draw polygons as either solid or outlines */
+  if (GLSetup_lineDrawing == 1)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  else
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void checkForTextureCondition(void (*draw)(void)) {
+  /* turn texturing on */
+  if (GLSetup_textures == 1) {
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, GLSetup_textureID[0]);
+    /* if textured, then use GLSetup_white as base colour */
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, WHITE);
+  }
+  if (draw != NULL) draw();
+  if (GLSetup_textures == 1) glDisable(GL_TEXTURE_2D);
+}
+
+void setStartingPos() {
+  glTranslatef(0 + GLSetup_cameraPos.x, 0 + GLSetup_cameraPos.y,
+               -100.0 + GLSetup_cameraPos.z);
+  glRotatef(20.0, 1.0, 0.0, 0.0);
+}
+
+void setMaterial() {
+  glMaterialf(GL_FRONT, GL_SHININESS, 30.0);
+  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, GREEN);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, GREEN);
+}
+
+void render(void) {
+  initLightSource();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glPushMatrix();
+  setMaterial();
+  setStartingPos();
+
+  //  Draw
+  checkForVectorAndShaderCondition();
+  checkForTextureCondition(draw);
+  glPopMatrix();
   glFlush();
 }
 
-/**
- * Read the keyboard, when q is pressed, exit the program.
- * @param key of the keyboard key that is pressed.
- * @param x of cursor
- * @param y of cursor
- */
-void keyboard(unsigned char key, int x, int y) {
-  switch (key) {
-    case 27:
-    case 'q':
-      exit(0);
-      break;
+void specialControl(int key, int x, int y) {
+  const double CAMERA_MOVEMENT = 25;
+  if (key == 'q' || key == 27) {
+    exit(0);
+  } else if (key == 'w' || key == GLUT_KEY_UP) {
+    GLSetup_cameraPos.y += CAMERA_MOVEMENT;
+    render();
+    printf("w key is pressed, y=%f.\n", GLSetup_cameraPos.y);
+  } else if (key == 's' || key == GLUT_KEY_DOWN) {
+    GLSetup_cameraPos.y -= CAMERA_MOVEMENT;
+    render();
+    printf("s key is pressed, y=%f.\n", GLSetup_cameraPos.y);
+  } else if (key == 'a' || key == GLUT_KEY_LEFT) {
+    GLSetup_cameraPos.x -= CAMERA_MOVEMENT;
+    render();
+    printf("a key is pressed, x=%f.\n", GLSetup_cameraPos.x);
+  } else if (key == 'd' || key == GLUT_KEY_RIGHT) {
+    GLSetup_cameraPos.x += CAMERA_MOVEMENT;
+    render();
+    printf("d key is pressed, x=%f.\n", GLSetup_cameraPos.x);
   }
 }
 
-/**
- * Testing function.
- */
-void test() {
-  print("Running script...");
-  print("__________Testign__________");
-  Point_test();
-  Model_test();
-  print("___________________________");
-  print("Script complete.");
+void keyboardControl(unsigned char key, int x, int y) {
+  if (key == '1') {  // draw polygons as outlines
+    GLSetup_lineDrawing = 1;
+    GLSetup_lighting = 0;
+    GLSetup_smoothShading = 0;
+    GLSetup_textures = 0;
+    render();
+    printf("1 is clicked.\n");
+  } else if (key == '2') {  // draw polygons as filled
+    GLSetup_lineDrawing = 0;
+    GLSetup_lighting = 0;
+    GLSetup_smoothShading = 0;
+    GLSetup_textures = 0;
+    render();
+    printf("2 is clicked.\n");
+  } else if (key == '3') {  // diffuse and specular lighting, flat shading
+    GLSetup_lineDrawing = 0;
+    GLSetup_lighting = 1;
+    GLSetup_smoothShading = 0;
+    GLSetup_textures = 0;
+    render();
+    printf("3 is clicked.\n");
+  } else if (key == '4') {  // diffuse and specular lighting, smooth shading
+    GLSetup_lineDrawing = 0;
+    GLSetup_lighting = 1;
+    GLSetup_smoothShading = 1;
+    GLSetup_textures = 0;
+    render();
+    printf("4 is clicked.\n");
+  } else if (key == '5') {  // texture with  smooth shading
+    GLSetup_lineDrawing = 0;
+    GLSetup_lighting = 1;
+    GLSetup_smoothShading = 1;
+    GLSetup_textures = 1;
+    render();
+    printf("5 is clicked.\n");
+  }
+}
+
+void mouseControl(int x, int y) {
+  const bool SHOW_DEBUG = false;
+  const char debug[] = "GLSetup_mouseControl():";
+  GLSetup_cameraPos.z = (y * 1) - (100 * 5);
+  if (SHOW_DEBUG) printf("%s x value is %d.\n", debug, x);
+  if (SHOW_DEBUG) printf("%s y value is %d.\n", debug, y);
+  if (SHOW_DEBUG) printf("GLSetup_cameraPos.z: %f.\n", GLSetup_cameraPos.z);
+  render();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -72,7 +253,7 @@ void test() {
 /* -------------------------------------------------------------------------- */
 
 int main(int argc, char** argv) {
-  if (SHOW_TEST) test();
+  // if (SHOW_TEST) test();
   print("______________________________________________________");
   print("Running script...\n");
 
@@ -98,13 +279,18 @@ int main(int argc, char** argv) {
   }
   if (DEBUG) Model_print(_parsedData);
 
-  // Initialize OpenGL and GLUT
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-  glutInitWindowSize(WINDOW_SIZE, WINDOW_SIZE);
-  glutCreateWindow("2D Test");
-  glutDisplayFunc(display);
-  glutKeyboardFunc(keyboard);
-  glutMainLoop();
+  // // Initialize OpenGL and GLUT
+  // glutInit(&argc, argv);
+  // glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
+  // glutInitWindowSize(1024, 768);
+  // glutCreateWindow(argv[1]);
+
+  // // Init light.
+  // initLight();
+  // glutDisplayFunc(display);
+  // glutKeyboardFunc(keyboard);
+  // glutMainLoop();
+  // Model_free(_parsedData);
+  runOpenGL(argc, argv);
   return 0;
 }

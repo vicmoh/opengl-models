@@ -2,7 +2,8 @@
     "files.associations": {
         "point.h": "c",
         "dynamic_string.h": "c",
-        "model.h": "c"
+        "model.h": "c",
+        "gl_setup.h": "c"
     },
     "C_Cpp.dimInactiveRegions": true
 }
