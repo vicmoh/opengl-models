@@ -39,7 +39,8 @@
  * tag $(). This wrap with indicator in the string tag
  * that it needs to be freed.
  */
-#define _(...) __numberForString(__numberToString(VARIADIC_ARGS_NUMBER(__VA_ARGS__)))
+#define _(...) \
+  __numberForString(__numberToString(VARIADIC_ARGS_NUMBER(__VA_ARGS__)))
 
 /*
  * Print function that acts similar to the

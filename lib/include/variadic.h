@@ -90,7 +90,8 @@
  * For initializing the variadic arguments
  * when wraping the definition for number.
  */
-#define VARIADIC_ARGS_NUMBER(...) __ARGS((double)__VA_ARGS__), (double)__VA_ARGS__
+#define VARIADIC_ARGS_NUMBER(...) \
+  __ARGS((double)__VA_ARGS__), (double)__VA_ARGS__
 
 /**
  * Get which parameter it is on.

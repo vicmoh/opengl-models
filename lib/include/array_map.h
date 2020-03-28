@@ -27,21 +27,12 @@
 #define for_in(x, object) for (int x = 0; x < (object->length); x++)
 
 /* -------------------------------------------------------------------------- */
-/*                  Struct to hold the data for array and map                 */
-/* -------------------------------------------------------------------------- */
-
-typedef struct {
-  void* data;
-  char key[1024];
-} ArrayMapData;
-
-/* -------------------------------------------------------------------------- */
 /*                                 Array class                                */
 /* -------------------------------------------------------------------------- */
 
 typedef struct __Array__ {
   unsigned int length;
-  ArrayMapData* index;
+  void** at;
   void (*destroyer)();
 } Array;
 
@@ -104,9 +95,14 @@ unsigned int Array_getLength(Array* self);
 /*                                  Map class                                 */
 /* -------------------------------------------------------------------------- */
 
+typedef struct {
+  void* data;
+  char key[1024];
+} MapEntry;
+
 typedef struct __Map__ {
   unsigned int tableSize;
-  ArrayMapData** table;
+  MapEntry** table;
   void (*destroyer)();
   Array* array;
   unsigned int length;
@@ -199,7 +195,8 @@ Garbage* __GARBAGE_COLLECTORS__;
 Garbage* new_Garbage(void (*sweeper)());
 
 /**
- * Sweep and free the garbage.
+ * Sweep and free the garbage including
+ * this object.
  * @param self the garbage object.
  */
 void Garbage_sweep(Garbage* self);
