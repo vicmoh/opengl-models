@@ -18,11 +18,13 @@
 #include "point.h"
 
 // Show print if debug is true.
-#define DEBUG false
-#define SHOW_TEST true
+#define DEBUG true
+#define SHOW_TEST false
 
 // Window size.
 #define WINDOW_SIZE 512
+
+Model* _parsedData;
 
 /**
  * OpenGL calls this to draw the screen.
@@ -71,10 +73,11 @@ void test() {
 
 int main(int argc, char** argv) {
   if (SHOW_TEST) test();
+  print("______________________________________________________");
   print("Running script...\n");
 
   // If no argument print the feedback.
-  if (argc == 0 || argv[1] == null || strcmp(argv[1], "") == 0) {
+  if (argc == 0 || argv[1] == null || isStringEqual(argv[1], "")) {
     print(
         "\nNO ARGUMENT FOUND! PLEASE SPECIFY ARGUMENT. Please read the README "
         "provided for more information.");
@@ -83,13 +86,17 @@ int main(int argc, char** argv) {
   }
 
   // Parse and print if it failed to parse.
-  if (false) {
+  _parsedData = new_Model(argv[1]);
+  if (_parsedData->hasError) {
     print(
         "\nCould not parse the file. Please make sure it is in the correct"
         "format. File path might be incorrect or does not exist.");
     print("\nScript complete.\n");
+    print("______________________________________________________");
+    Model_free(_parsedData);
     return 0;
   }
+  if (DEBUG) Model_print(_parsedData);
 
   // Initialize OpenGL and GLUT
   glutInit(&argc, argv);

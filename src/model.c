@@ -6,16 +6,20 @@ Model* __new_Model() {
   this->vertices = 0;
   this->faceList = new_Array(Splitter_free);
   this->vertices = new_Array(Point_free);
+  this->hasError = false;
   return this;
 }
 
 Model* new_Model(String filePath) {
-  const bool DEBUG = true;
+  const bool DEBUG = false;
 
   // Initialize the data.
   FileReader* file = new_FileReader(filePath);
-  if (file == null) return null;
   Model* this = __new_Model();
+  if (file == null) {
+    this->hasError = true;
+    return this;
+  }
 
   // Initialize
   int faceCounter = 0;
@@ -84,11 +88,30 @@ String Model_toString(Model* this) {
            ", vertices#: ", _(this->numOfVertices));
 }
 
-void free_Model(Model* this) {
+void Model_free(Model* this) {
   if (this == null) return;
-  free(this->toString);
   Array_free(this->faceList);
   Array_free(this->vertices);
+}
+
+void Model_print(Model* this) {
+  Garbage* gcStr = new_Garbage(free);
+  print("The ant model parsed: ", Garbage_collect(gcStr, Model_toString(this)));
+  print("Printing the result of the all the vertex...");
+
+  // Printing all the points
+  for_in(next, this->vertices) print(
+      "Vertex[", _(next), "]: ",
+      Garbage_collect(gcStr, Point_toString(Array_get(this->vertices, next))));
+
+  // Printing all the facelist
+  for_in(next, this->faceList)
+      print("Face[", _(next), "]: ",
+            Garbage_collect(
+                gcStr, Splitter_toString(Array_get(this->faceList, next))));
+
+  // Free garbage mem
+  Garbage_sweep(gcStr);
 }
 
 void Model_test() {
@@ -118,5 +141,5 @@ void Model_test() {
   if (test->numOfFaces == test->faceList->length) print("Faces number match!");
 
   Garbage_sweep(gcStr);
-  free_Model(test);
+  Model_free(test);
 }
