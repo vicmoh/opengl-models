@@ -281,5 +281,6 @@ int main(int argc, char** argv) {
 
   // // Initialize OpenGL and GLUT run
   runOpenGL(argc, argv);
+  Model_free(_parsedData);
   return 0;
 }
