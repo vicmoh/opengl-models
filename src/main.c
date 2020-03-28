@@ -169,7 +169,7 @@ void render(void) {
   setMaterial();
   setStartingPos();
 
-  //  Draw
+  // Draw
   checkForVectorAndShaderCondition();
   checkForTextureCondition(draw);
   glPopMatrix();
