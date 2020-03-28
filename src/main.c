@@ -279,18 +279,7 @@ int main(int argc, char** argv) {
   }
   if (DEBUG) Model_print(_parsedData);
 
-  // // Initialize OpenGL and GLUT
-  // glutInit(&argc, argv);
-  // glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
-  // glutInitWindowSize(1024, 768);
-  // glutCreateWindow(argv[1]);
-
-  // // Init light.
-  // initLight();
-  // glutDisplayFunc(display);
-  // glutKeyboardFunc(keyboard);
-  // glutMainLoop();
-  // Model_free(_parsedData);
+  // // Initialize OpenGL and GLUT run
   runOpenGL(argc, argv);
   return 0;
 }
