@@ -24,6 +24,7 @@
 
 // The patsed data file of PLY.
 Model* _parsedData;
+double _rotate = 0;
 
 /* flags used to control the appearance of the image */
 int GLSetup_lineDrawing = 1;    // draw polygons as solid or lines
@@ -61,14 +62,23 @@ void drawFace(int index) {
   MEM_SWEEP
 }
 
-// /**
-//  * Draw Based on parsed data.
-//  */
+/**
+ * Draw Based on parsed data.
+ */
 void draw() { for_in(next, _parsedData->faceList) drawFace(next); }
 
-/* -------------------------------------------------------------------------- */
-/*                              openGL functions                              */
-/* -------------------------------------------------------------------------- */
+/**
+ * Update function, this will
+ * call in a loop in open gl.
+ */
+void update() {
+	_rotate += 1.0;
+	render();
+}
+
+//--------------------------------------------
+// OpenGL functions
+//--------------------------------------------
 
 void runOpenGL(int argc, char** argv) {
   printf("Running with file: %s\n", argv[1]);
@@ -83,6 +93,7 @@ void runOpenGL(int argc, char** argv) {
   glutReshapeFunc(reshapeWindow);
   glutDisplayFunc(render);
   glutKeyboardFunc(keyboardControl);
+	glutIdleFunc(update);
   glutSpecialFunc(specialControl);
   glutMotionFunc(mouseControl);
 
@@ -138,12 +149,15 @@ void checkForVectorAndShaderCondition() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
+/**
+ * Turn texturing on.
+ */
 void checkForTextureCondition(void (*draw)(void)) {
-  /* turn texturing on */
+  // Turn texturing on
   if (GLSetup_textures == 1) {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, GLSetup_textureID[0]);
-    /* if textured, then use GLSetup_white as base colour */
+    // If textured, then use GLSetup_white as base colour
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, WHITE);
   }
   if (draw != NULL) draw();
@@ -153,7 +167,7 @@ void checkForTextureCondition(void (*draw)(void)) {
 void setStartingPos() {
   glTranslatef(0 + GLSetup_cameraPos.x, 0 + GLSetup_cameraPos.y,
                -100.0 + GLSetup_cameraPos.z);
-  glRotatef(20.0, 1.0, 0.0, 0.0);
+  glRotatef(_rotate, 0.0, 1.0, 0.0);
 }
 
 void setMaterial() {
@@ -248,12 +262,11 @@ void mouseControl(int x, int y) {
   render();
 }
 
-/* -------------------------------------------------------------------------- */
-/*                      Main Function to run the program                      */
-/* -------------------------------------------------------------------------- */
+//---------------------------------------------------
+// Main function to run the program
+//---------------------------------------------------
 
 int main(int argc, char** argv) {
-  // if (SHOW_TEST) test();
   print("______________________________________________________");
   print("Running script...\n");
 
@@ -279,7 +292,7 @@ int main(int argc, char** argv) {
   }
   if (DEBUG) Model_print(_parsedData);
 
-  // // Initialize OpenGL and GLUT run
+  // Initialize OpenGL and GLUT then run.
   runOpenGL(argc, argv);
   Model_free(_parsedData);
   return 0;
