@@ -20,17 +20,18 @@ INC=-I$(INC_DIR) -I$(LIB_DIR)
 FLAGS=clang -Wno-nullability-completeness
 
 FILE=''
+EXEC_FILE=a4
 
 packages:
 	export LD_LIBRARY_PATH=./lib/shared:$$LD_LIBRARY_PATH
 
 # Compile the C code.
 compile: packages
-	$(FLAGS) $(SRC_DIR)*.c $(INC) -o $(BIN_DIR)run $(INCLUDES) $(LIB) $(TARGET)
+	$(FLAGS) $(SRC_DIR)*.c $(INC) -o ./$(EXEC_FILE) $(INCLUDES) $(LIB) $(TARGET)
 
 # Run the program.
 run:
-	$(BIN_DIR)run $(FILE)
+	./$(EXEC_FILE) $(FILE)
 
 # Test the program.
 sure: packages
