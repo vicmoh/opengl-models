@@ -1,7 +1,3 @@
-// Calculates a ray that passes through each pixel of the viewing window.
-// Draws randomly coloured pixel in the viewing window.
-
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
