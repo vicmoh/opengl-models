@@ -21,6 +21,8 @@
 // Show print if debug is true.
 #define DEBUG true
 #define SHOW_TEST false
+#define SHOW_LIGHT_ARROW false
+#define SHOW_MOVING_LIGHT false
 
 // The patsed data file of PLY.
 static double _rotate = 0;
@@ -182,16 +184,16 @@ static void drawFloor(void) {
 static void redraw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-  // /* Reposition the light source. */
-  // // lightPosition[0] = 12 * cos(lightAngle);
+  // Reposition of the light source.
   lightPosition[1] = lightHeight;
-  /*
-lightPosition[2] = 12 * sin(lightAngle);
-if (directionalLight) {
-lightPosition[3] = 0.0;
-} else {
-lightPosition[3] = 1.0;
-}*/
+  if (SHOW_MOVING_LIGHT) {
+    lightPosition[0] = 12 * cos(lightAngle);
+    lightPosition[2] = 12 * sin(lightAngle);
+    if (directionalLight)
+      lightPosition[3] = 0.0;
+    else
+      lightPosition[3] = 1.0;
+  }
 
   shadowMatrix(floorShadow, floorPlane, lightPosition);
 
@@ -249,37 +251,41 @@ lightPosition[3] = 1.0;
   glDisable(GL_POLYGON_OFFSET_FILL);
   glDisable(GL_STENCIL_TEST);
 
-  glPushMatrix();
-  glDisable(GL_LIGHTING);
-  glColor3f(1.0, 1.0, 0.0);
-  if (directionalLight) {
-    /* Draw an arrowhead. */
-    glDisable(GL_CULL_FACE);
-    glTranslatef(lightPosition[0], lightPosition[1], lightPosition[2]);
-    glRotatef(lightAngle * -180.0 / M_PI, 0, 1, 0);
-    glRotatef(atan(lightHeight / 12) * 180.0 / M_PI, 0, 0, 1);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0, 0, 0);
-    glVertex3f(2, 1, 1);
-    glVertex3f(2, -1, 1);
-    glVertex3f(2, -1, -1);
-    glVertex3f(2, 1, -1);
-    glVertex3f(2, 1, 1);
-    glEnd();
-    /* Draw a white line from light direction. */
-    glColor3f(1.0, 1.0, 1.0);
-    glBegin(GL_LINES);
-    glVertex3f(0, 0, 0);
-    glVertex3f(5, 0, 0);
-    glEnd();
-    glEnable(GL_CULL_FACE);
-  } else {
-    /* Draw a yellow ball at the light source. */
-    glTranslatef(lightPosition[0], lightPosition[1], lightPosition[2]);
-    glutSolidSphere(1.0, 5, 5);
+  /// Determine whether to show
+  /// Where the light source comes from.
+  if (SHOW_LIGHT_ARROW) {
+    glPushMatrix();
+    glDisable(GL_LIGHTING);
+    glColor3f(1.0, 1.0, 0.0);
+    if (directionalLight) {
+      /* Draw an arrowhead. */
+      glDisable(GL_CULL_FACE);
+      glTranslatef(lightPosition[0], lightPosition[1], lightPosition[2]);
+      glRotatef(lightAngle * -180.0 / M_PI, 0, 1, 0);
+      glRotatef(atan(lightHeight / 12) * 180.0 / M_PI, 0, 0, 1);
+      glBegin(GL_TRIANGLE_FAN);
+      glVertex3f(0, 0, 0);
+      glVertex3f(2, 1, 1);
+      glVertex3f(2, -1, 1);
+      glVertex3f(2, -1, -1);
+      glVertex3f(2, 1, -1);
+      glVertex3f(2, 1, 1);
+      glEnd();
+      // Draw a white line from light direction.
+      glColor3f(1.0, 1.0, 1.0);
+      glBegin(GL_LINES);
+      glVertex3f(0, 0, 0);
+      glVertex3f(5, 0, 0);
+      glEnd();
+      glEnable(GL_CULL_FACE);
+    } else {
+      // Draw a yellow ball at the light source.
+      glTranslatef(lightPosition[0], lightPosition[1], lightPosition[2]);
+      glutSolidSphere(1.0, 5, 5);
+    }
+    glEnable(GL_LIGHTING);
+    glPopMatrix();
   }
-  glEnable(GL_LIGHTING);
-  glPopMatrix();
 
   glPopMatrix();
   glutSwapBuffers();
