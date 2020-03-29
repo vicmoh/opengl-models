@@ -50,9 +50,9 @@ static Point _cameraPos = {.x = 0, .y = 0, .z = 0};
 static void drawFace(int index) {
   MEM_TRACK
   Splitter *faceSplit = Model_parsedData->faceList->at[index];
-
   if (isStringEqual(faceSplit->at[0], "3")) glBegin(GL_TRIANGLES);
   if (isStringEqual(faceSplit->at[0], "4")) glBegin(GL_QUADS);
+  glColor3f(0, 0, 0);  // Shadow color
   double offsetY = fabs(*Model_parsedData->minY);
   for_in(next, faceSplit) {
     if (next == 0) continue;
