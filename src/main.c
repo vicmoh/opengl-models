@@ -55,9 +55,8 @@ void drawFace(int index) {
     if (next == 0) continue;
     int curPos = atoi(faceSplit->at[next]);
     Point* curVertex = _parsedData->vertices->at[curPos];
-    int maxVal = fabs(*_parsedData->minY) + fabs(*_parsedData->maxY);
-
-    double normalizer = 10 / (fabs(*_parsedData->maxY));
+    double normalizer =
+        15 / (fabs(*_parsedData->maxY) + fabs(*_parsedData->minY));
     double x = curVertex->x * normalizer;
     double y = curVertex->y * normalizer;
     double z = curVertex->z * normalizer;
