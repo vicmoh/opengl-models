@@ -60,7 +60,8 @@ void drawFace(int index) {
     double x = curVertex->x * normalizer;
     double y = curVertex->y * normalizer;
     double z = curVertex->z * normalizer;
-    glNormal3f(x, y, z);
+    double distance = sqrt(x * x + y * y + z * z);
+    glNormal3f(x / distance, y / distance, z / distance);
     glVertex3f(x, y, z);
   }
   glEnd();
@@ -122,7 +123,7 @@ void initLightSource(void) {
   GLfloat lightSpecular[] = {1.0, 1.0, 1.0, 1.0};
   GLfloat lightFullOff[] = {0.0, 0.0, 0.0, 1.0};
   GLfloat lightFullOn[] = {1.0, 1.0, 1.0, 1.0};
-  GLfloat lightPosition[] = {1.0, 1.0, 1.0, 0.0};
+  GLfloat lightPosition[] = {5, 10, 0.0, 0.0};
   /* if lighting is turned on then use ambient, diffuse and specular
      lights, otherwise use ambient lighting only */
   if (GLSetup_lighting == 1) {
@@ -177,13 +178,14 @@ void setStartingPos() {
 
 void setMaterial() {
   glMaterialf(GL_FRONT, GL_SHININESS, 30.0);
-  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, GREEN);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, GREEN);
+  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, RED);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, RED);
 }
 
 void render(void) {
   initLightSource();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearColor(0.9, 0.9, 0.9, 1.0);
   glPushMatrix();
   setMaterial();
   setStartingPos();
