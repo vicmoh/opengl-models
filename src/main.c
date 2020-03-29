@@ -20,9 +20,9 @@
 
 // Show print if debug is true.
 #define DEBUG true
-#define SHOW_TEST false
 #define SHOW_LIGHT_ARROW false
 #define SHOW_MOVING_LIGHT false
+#define SHOW_FLOOR false
 
 // The patsed data file of PLY.
 static double _rotate = 0;
@@ -50,6 +50,7 @@ static Point _cameraPos = {.x = 0, .y = 0, .z = 0};
 static void drawFace(int index) {
   MEM_TRACK
   Splitter *faceSplit = Model_parsedData->faceList->at[index];
+
   if (isStringEqual(faceSplit->at[0], "3")) glBegin(GL_TRIANGLES);
   if (isStringEqual(faceSplit->at[0], "4")) glBegin(GL_QUADS);
   double offsetY = fabs(*Model_parsedData->minY);
@@ -83,7 +84,7 @@ static void drawModel() {
 
 static void redraw();
 static void update() {
-  _rotate += 1.0;
+  _rotate -= 3.0;
   redraw();
 }
 
@@ -107,7 +108,7 @@ int moving = 0, startx = 0, starty;
 int lightMoving = 0, lightStartX = 0, lightStartY = 0;
 
 static GLfloat lightPosition[4];
-static GLfloat lightColor[] = {0.8, 1.0, 0.8, 1.0};  // Green-tinted light.
+static GLfloat lightColor[] = {1, 0.3, 0.3, 1.0};  // Red-tinted light.
 
 static GLfloat floorVertices[4][3] = {
     {-20.0, 0.0, 20.0},
@@ -118,6 +119,13 @@ static GLfloat floorVertices[4][3] = {
 
 enum { X, Y, Z, W };
 enum { A, B, C, D };
+
+static void printLightPosition() {
+  print("x: ", _(lightPosition[0]));
+  print("y: ", _(lightPosition[1]));
+  print("z: ", _(lightPosition[2]));
+  print("light: ", _(lightPosition[3]));
+}
 
 /* Create a matrix that will project the desired shadow. */
 void shadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
@@ -183,6 +191,7 @@ static void drawFloor(void) {
 
 static void redraw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glClearColor(1, 1, 1, 1);
 
   // Reposition of the light source.
   lightPosition[1] = lightHeight;
@@ -210,24 +219,28 @@ static void redraw() {
     appearances.  The top floor surface is reflective and kind of red.
     The bottom floor surface is not reflective and blue. */
 
-  /* Draw "bottom" of floor in blue. */
-  glFrontFace(GL_CW); /* Switch face orientation. */
-  glColor4f(0.1, 0.1, 0.1, 1.0);
-  drawFloor();
-  glFrontFace(GL_CCW);
+  // Bottom floor color.
+  if (SHOW_FLOOR) {
+    glFrontFace(GL_CW); /* Switch face orientation. */
+    glColor4f(0.1, 0.1, 0.1, 1.0);
+    drawFloor();
+    glFrontFace(GL_CCW);
 
-  glEnable(GL_STENCIL_TEST);
-  glStencilFunc(GL_ALWAYS, 3, 0xffffffff);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 3, 0xffffffff);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+  }
 
-  /* Draw "top" of floor.  Use blending to blend in reflection. */
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColor4f(0.7, 0.0, 0.0, 0.3);
-  glColor4f(1.0, 1.0, 1.0, 0.3);
-  drawFloor();
-  glDisable(GL_BLEND);
+  // Draw top floor
+  if (SHOW_FLOOR) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1.0, 1.0, 1.0, 0.3);
+    drawFloor();
+    glDisable(GL_BLEND);
+  }
 
+  glRotatef(_rotate, 0, 1, 0);
   drawModel();
 
   glStencilFunc(GL_LESS, 2, 0xffffffff);
@@ -246,6 +259,8 @@ static void redraw() {
   drawModel();
 
   glPopMatrix();
+
+  /// Setting
   glDisable(GL_BLEND);
   glEnable(GL_LIGHTING);
   glDisable(GL_POLYGON_OFFSET_FILL);
@@ -305,14 +320,15 @@ static void mouse(int button, int state, int x, int y) {
     }
     if (state == GLUT_UP) moving = 0;
   }
-  if (button == GLUT_MIDDLE_BUTTON) {
-    if (state == GLUT_DOWN) {
-      lightMoving = 1;
-      lightStartX = x;
-      lightStartY = y;
+  if (SHOW_MOVING_LIGHT)
+    if (button == GLUT_MIDDLE_BUTTON) {
+      if (state == GLUT_DOWN) {
+        lightMoving = 1;
+        lightStartX = x;
+        lightStartY = y;
+      }
+      if (state == GLUT_UP) lightMoving = 0;
     }
-    if (state == GLUT_UP) lightMoving = 0;
-  }
 }
 
 // Camera motion.
@@ -324,30 +340,14 @@ static void motion(int x, int y) {
     starty = y;
     glutPostRedisplay();
   }
-  if (lightMoving) {
-    lightAngle += (x - lightStartX) / 40.0;
-    lightHeight += (lightStartY - y) / 20.0;
-    lightStartX = x;
-    lightStartY = y;
-    glutPostRedisplay();
-  }
-}
-
-// Advance time varying state when idle callback registered.
-static void idle(void) {
-  static float time = 0.0;
-  time = glutGet(GLUT_ELAPSED_TIME) / 500.0;
-  if (!lightMoving) lightAngle += 0.03;
-  glutPostRedisplay();
-}
-
-// When not visible, stop animating.  Restart when visible again.
-static void visible(int vis) {
-  if (vis == GLUT_VISIBLE) {
-    if (animation) glutIdleFunc(idle);
-  } else {
-    if (!animation) glutIdleFunc(NULL);
-  }
+  if (SHOW_MOVING_LIGHT)
+    if (lightMoving) {
+      lightAngle += (x - lightStartX) / 40.0;
+      lightHeight += (lightStartY - y) / 20.0;
+      lightStartX = x;
+      lightStartY = y;
+      glutPostRedisplay();
+    }
 }
 
 // Press key to redraw if stopped  drawing.
@@ -356,10 +356,7 @@ static void key(unsigned char c, int x, int y) {
   glutPostRedisplay();
 }
 
-// Press key to redraw if stopped  drawing.
-static void special(int k, int x, int y) { glutPostRedisplay(); }
-
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 /*                                    Main                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -376,10 +373,8 @@ int main(int argc, char **argv) {
   glutDisplayFunc(redraw);
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
-  glutVisibilityFunc(visible);
   glutKeyboardFunc(key);
   glutIdleFunc(update);
-  glutSpecialFunc(special);
 
   // Init the modes and enable.
   glPolygonOffset(-2.0, -1.0);
