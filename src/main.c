@@ -87,41 +87,23 @@ void update() {
 /*                              Open GL Functions                             */
 /* -------------------------------------------------------------------------- */
 
-/* Some <math.h> files do not define M_PI... */
-#ifndef M_PI
-#define M_PI 3.14159265
-#endif
-
-/* Variable controlling various rendering modes. */
-static int stencilReflection = 1, stencilShadow = 1, offsetShadow = 1;
-static int renderShadow = 1, renderDinosaur = 1, renderReflection = 1;
-static int linearFiltering = 0, useMipmaps = 0, useTexture = 1;
-static int reportSpeed = 0;
+// Variable controlling various rendering modes.
 static int animation = 1;
-static GLboolean lightSwitch = GL_TRUE;
 static int directionalLight = 1;
-static int forceExtension = 0;
 
 static GLfloat floorPlane[4];
 static GLfloat floorShadow[4][4];
 
-/* Time varying or user-controled variables. */
-static float jump = 0.0;
+// Control for the camera angle and lighting.
 static float lightAngle = 0.0, lightHeight = 20;
-GLfloat angle = -150; /* in degrees */
-GLfloat angle2 = 30;  /* in degrees */
+GLfloat angle = -150;  // in degrees
+GLfloat angle2 = 30;   // in degrees
 
-int moving, startx, starty;
-int lightMoving = 0, lightStartX, lightStartY;
-
-enum { MISSING, EXTENSION, ONE_DOT_ONE };
-int polygonOffsetVersion;
+int moving = 0, startx = 0, starty;
+int lightMoving = 0, lightStartX = 0, lightStartY = 0;
 
 static GLfloat lightPosition[4];
-static GLfloat lightColor[] = {0.8, 1.0, 0.8, 1.0}; /* green-tinted */
-static GLfloat skinColor[] = {0.1, 1.0, 0.1, 1.0},
-               eyeColor[] = {1.0, 0.2, 0.2, 1.0};
-/* *INDENT-ON* */
+static GLfloat lightColor[] = {0.8, 1.0, 0.8, 1.0};  // Green-tinted light.
 
 static GLfloat floorVertices[4][3] = {
     {-20.0, 0.0, 20.0},
@@ -133,47 +115,12 @@ static GLfloat floorVertices[4][3] = {
 enum { X, Y, Z, W };
 enum { A, B, C, D };
 
-/* Enumerants for refering to display lists. */
-typedef enum {
-  RESERVED,
-  BODY_SIDE,
-  BODY_EDGE,
-  BODY_WHOLE,
-  ARM_SIDE,
-  ARM_EDGE,
-  ARM_WHOLE,
-  LEG_SIDE,
-  LEG_EDGE,
-  LEG_WHOLE,
-  EYE_SIDE,
-  EYE_EDGE,
-  EYE_WHOLE
-} displayLists;
-
-enum {
-  M_NONE,
-  M_MOTION,
-  M_LIGHT,
-  M_TEXTURE,
-  M_SHADOWS,
-  M_REFLECTION,
-  M_DINOSAUR,
-  M_STENCIL_REFLECTION,
-  M_STENCIL_SHADOW,
-  M_OFFSET_SHADOW,
-  M_POSITIONAL,
-  M_DIRECTIONAL,
-  M_PERFORMANCE
-};
-
 /* Create a matrix that will project the desired shadow. */
 void shadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
                   GLfloat lightpos[4]) {
-  GLfloat dot;
-
-  /* Find dot product between light position vector and ground plane normal. */
-  dot = groundplane[X] * lightpos[X] + groundplane[Y] * lightpos[Y] +
-        groundplane[Z] * lightpos[Z] + groundplane[W] * lightpos[W];
+  // Find dot product between light position vector and ground plane normal.
+  GLfloat dot = groundplane[X] * lightpos[X] + groundplane[Y] * lightpos[Y] +
+                groundplane[Z] * lightpos[Z] + groundplane[W] * lightpos[W];
 
   shadowMat[0][0] = dot - lightpos[X] * groundplane[X];
   shadowMat[1][0] = 0.f - lightpos[X] * groundplane[Y];
@@ -199,7 +146,6 @@ void shadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
 /* Find the plane equation given 3 points. */
 void findPlane(GLfloat plane[4], GLfloat v0[3], GLfloat v1[3], GLfloat v2[3]) {
   GLfloat vec0[3], vec1[3];
-
   /* Need 2 vectors to find cross product. */
   vec0[X] = v1[X] - v0[X];
   vec0[Y] = v1[Y] - v0[Y];
@@ -208,12 +154,10 @@ void findPlane(GLfloat plane[4], GLfloat v0[3], GLfloat v1[3], GLfloat v2[3]) {
   vec1[X] = v2[X] - v0[X];
   vec1[Y] = v2[Y] - v0[Y];
   vec1[Z] = v2[Z] - v0[Z];
-
   /* find cross product to get A, B, and C of plane equation */
   plane[A] = vec0[Y] * vec1[Z] - vec0[Z] * vec1[Y];
   plane[B] = -(vec0[X] * vec1[Z] - vec0[Z] * vec1[X]);
   plane[C] = vec0[X] * vec1[Y] - vec0[Y] * vec1[X];
-
   plane[D] = -(plane[A] * v0[X] + plane[B] * v0[Y] + plane[C] * v0[Z]);
 }
 
@@ -335,7 +279,6 @@ lightPosition[3] = 1.0;
   glPopMatrix();
 
   glPopMatrix();
-
   glutSwapBuffers();
 }
 
@@ -343,7 +286,7 @@ lightPosition[3] = 1.0;
 /*                                  Controls                                  */
 /* -------------------------------------------------------------------------- */
 
-/* ARGSUSED2 */
+// Mouse control.
 static void mouse(int button, int state, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
     if (state == GLUT_DOWN) {
@@ -351,9 +294,7 @@ static void mouse(int button, int state, int x, int y) {
       startx = x;
       starty = y;
     }
-    if (state == GLUT_UP) {
-      moving = 0;
-    }
+    if (state == GLUT_UP) moving = 0;
   }
   if (button == GLUT_MIDDLE_BUTTON) {
     if (state == GLUT_DOWN) {
@@ -361,13 +302,11 @@ static void mouse(int button, int state, int x, int y) {
       lightStartX = x;
       lightStartY = y;
     }
-    if (state == GLUT_UP) {
-      lightMoving = 0;
-    }
+    if (state == GLUT_UP) lightMoving = 0;
   }
 }
 
-/* ARGSUSED1 */
+// Camera motion.
 static void motion(int x, int y) {
   if (moving) {
     angle = angle + (x - startx);
@@ -385,20 +324,15 @@ static void motion(int x, int y) {
   }
 }
 
-/* Advance time varying state when idle callback registered. */
+// Advance time varying state when idle callback registered.
 static void idle(void) {
   static float time = 0.0;
-
   time = glutGet(GLUT_ELAPSED_TIME) / 500.0;
-
-  jump = 4.0 * fabs(sin(time) * 0.5);
-  if (!lightMoving) {
-    lightAngle += 0.03;
-  }
+  if (!lightMoving) lightAngle += 0.03;
   glutPostRedisplay();
 }
 
-/* When not visible, stop animating.  Restart when visible again. */
+// When not visible, stop animating.  Restart when visible again.
 static void visible(int vis) {
   if (vis == GLUT_VISIBLE) {
     if (animation) glutIdleFunc(idle);
@@ -407,19 +341,13 @@ static void visible(int vis) {
   }
 }
 
-/* Press any key to redraw; good when motion stopped and
-   performance reporting on. */
-/* ARGSUSED */
+// Press key to redraw if stopped  drawing.
 static void key(unsigned char c, int x, int y) {
-  if (c == 27) {
-    exit(0); /* IRIS GLism, Escape quits. */
-  }
+  if (c == 27) exit(0);  // Escape key
   glutPostRedisplay();
 }
 
-/* Press any key to redraw; good when motion stopped and
-   performance reporting on. */
-/* ARGSUSED */
+// Press key to redraw if stopped  drawing.
 static void special(int k, int x, int y) { glutPostRedisplay(); }
 
 /* -------------------------------------------------------------------------- */
