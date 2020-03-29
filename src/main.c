@@ -55,8 +55,14 @@ void drawFace(int index) {
     if (next == 0) continue;
     int curPos = atoi(faceSplit->at[next]);
     Point* curVertex = _parsedData->vertices->at[curPos];
-    glNormal3f(curVertex->x, curVertex->y, curVertex->z);
-    glVertex3f(curVertex->x, curVertex->y, curVertex->z);
+    int maxVal = fabs(*_parsedData->minY) + fabs(*_parsedData->maxY);
+
+    double normalizer = 10 / (fabs(*_parsedData->maxY));
+    double x = curVertex->x * normalizer;
+    double y = curVertex->y * normalizer;
+    double z = curVertex->z * normalizer;
+    glNormal3f(x, y, z);
+    glVertex3f(x, y, z);
   }
   glEnd();
   MEM_SWEEP
@@ -72,8 +78,8 @@ void draw() { for_in(next, _parsedData->faceList) drawFace(next); }
  * call in a loop in open gl.
  */
 void update() {
-	_rotate += 1.0;
-	render();
+  _rotate += 1.0;
+  render();
 }
 
 //--------------------------------------------
@@ -93,7 +99,7 @@ void runOpenGL(int argc, char** argv) {
   glutReshapeFunc(reshapeWindow);
   glutDisplayFunc(render);
   glutKeyboardFunc(keyboardControl);
-	glutIdleFunc(update);
+  glutIdleFunc(update);
   glutSpecialFunc(specialControl);
   glutMotionFunc(mouseControl);
 
@@ -149,9 +155,6 @@ void checkForVectorAndShaderCondition() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-/**
- * Turn texturing on.
- */
 void checkForTextureCondition(void (*draw)(void)) {
   // Turn texturing on
   if (GLSetup_textures == 1) {
@@ -165,8 +168,11 @@ void checkForTextureCondition(void (*draw)(void)) {
 }
 
 void setStartingPos() {
-  glTranslatef(0 + GLSetup_cameraPos.x, 0 + GLSetup_cameraPos.y,
-               -100.0 + GLSetup_cameraPos.z);
+  int x = 0;  //(*_parsedData->minX + *_parsedData->maxX) / 2;
+  int y = 0;  // (*_parsedData->minY + *_parsedData->maxY) / 2;
+  int z = 0;  // (*_parsedData->minZ + *_parsedData->maxZ) / 2;
+  glTranslatef(x + 0 + GLSetup_cameraPos.x, y + 0 + GLSetup_cameraPos.y,
+               z + -100.0 + GLSetup_cameraPos.z);
   glRotatef(_rotate, 0.0, 1.0, 0.0);
 }
 

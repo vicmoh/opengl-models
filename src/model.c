@@ -7,7 +7,38 @@ Model* __new_Model() {
   this->faceList = new_Array(Splitter_free);
   this->vertices = new_Array(Point_free);
   this->hasError = false;
+  this->minX = null;
+  this->maxX = null;
+  this->minY = null;
+  this->maxY = null;
+  this->minZ = null;
+  this->maxZ = null;
   return this;
+}
+
+void __Model_checkBoundary(Model* this, Point* point) {
+  /// Init if it hasn't.
+  if (this->minX == null || this->maxX == null) {
+    this->minX = new_Number(point->x);
+    this->maxX = new_Number(point->x);
+    return;
+  } else if (this->minY == null || this->maxY == null) {
+    this->minY = new_Number(point->y);
+    this->maxY = new_Number(point->y);
+    return;
+  } else if (this->minZ == null || this->maxZ == null) {
+    this->minZ = new_Number(point->z);
+    this->maxZ = new_Number(point->z);
+    return;
+  }
+
+  // Check if it's is min or max;
+  if (*this->minX > point->x) this->minX = new_Number(point->x);
+  if (*this->maxX < point->x) this->maxX = new_Number(point->x);
+  if (*this->minY > point->y) this->minY = new_Number(point->y);
+  if (*this->maxY < point->y) this->maxY = new_Number(point->y);
+  if (*this->minZ > point->z) this->minZ = new_Number(point->z);
+  if (*this->maxZ < point->z) this->maxZ = new_Number(point->z);
 }
 
 Model* new_Model(String filePath) {
@@ -57,10 +88,14 @@ Model* new_Model(String filePath) {
       if (this->numOfVertices > vertexCounter) {
         vertexCounter++;
         if (DEBUG) print("vertexCounter: ", _(vertexCounter));
+        // Add the point.
         Splitter* vertexData = new_Splitter(eachLine, " ");
-        Array_add(this->vertices,
-                  new_PointOf(atof(vertexData->at[0]), atof(vertexData->at[1]),
-                              atof(vertexData->at[2])));
+        Point* curPoint =
+            new_PointOf(atof(vertexData->at[0]), atof(vertexData->at[1]),
+                        atof(vertexData->at[2]));
+        Array_add(this->vertices, curPoint);
+        __Model_checkBoundary(this, curPoint);
+        // Check the  max width and height.
         Splitter_free(vertexData);
       } else if (this->numOfFaces > faceCounter) {
         faceCounter++;
@@ -92,6 +127,8 @@ void Model_free(Model* this) {
   if (this == null) return;
   Array_free(this->faceList);
   Array_free(this->vertices);
+  dispose(this->minX, this->minY, this->minZ, this->minZ, this->maxY,
+          this->maxZ);
 }
 
 void Model_print(Model* this) {
@@ -109,6 +146,15 @@ void Model_print(Model* this) {
       print("Face[", _(next), "]: ",
             Garbage_collect(
                 gcStr, Splitter_toString(Array_get(this->faceList, next))));
+
+  // Print boundary
+  print("______________________________________________");
+  print("minX: ", _(*this->minX));
+  print("minY: ", _(*this->minY));
+  print("minZ: ", _(*this->minZ));
+  print("maxX: ", _(*this->maxX));
+  print("maxY: ", _(*this->maxY));
+  print("maxZ: ", _(*this->maxZ));
 
   // Free garbage mem
   Garbage_sweep(gcStr);

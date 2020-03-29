@@ -4,8 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/include/**",
-                "${workspaceFolder}/lib/portable-string/include"
+                "${workspaceFolder}/include/**"
             ],
             "defines": [],
             "macFrameworkPath": [

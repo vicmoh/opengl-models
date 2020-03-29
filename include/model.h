@@ -9,6 +9,8 @@
 
 typedef struct {
   int numOfVertices, numOfFaces;
+  double *maxX, *maxY, *maxZ;
+  double *minX, *minY, *minZ;
   Array* faceList;  // Array of  splits.
   Array* vertices;  // Array of points.
   bool hasError;
