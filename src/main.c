@@ -45,9 +45,8 @@ static Point _cameraPos = {.x = 0, .y = 0, .z = 0};
  * Draw the face from multiple vertex.
  * @param index of the face.
  */
-void drawFace(int index) {
+static void drawFace(int index) {
   MEM_TRACK
-  glRotatef(_rotate, 0.0, 1.0, 0.0);
   Splitter *faceSplit = Model_parsedData->faceList->at[index];
   if (isStringEqual(faceSplit->at[0], "3")) glBegin(GL_TRIANGLES);
   if (isStringEqual(faceSplit->at[0], "4")) glBegin(GL_QUADS);
@@ -76,11 +75,14 @@ void drawFace(int index) {
 /**
  * Draw Based on parsed data.
  */
-void drawModel() { for_in(next, Model_parsedData->faceList) drawFace(next); }
+static void drawModel() {
+  for_in(next, Model_parsedData->faceList) drawFace(next);
+}
 
-void update() {
+static void redraw();
+static void update() {
   _rotate += 1.0;
-  drawModel();
+  redraw();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -177,7 +179,7 @@ static void drawFloor(void) {
   glEnable(GL_LIGHTING);
 }
 
-static void redraw(void) {
+static void redraw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   // /* Reposition the light source. */
@@ -226,20 +228,21 @@ lightPosition[3] = 1.0;
 
   drawModel();
 
-  glStencilFunc(GL_LESS, 2, 0xffffffff); /* draw if ==1 */
+  glStencilFunc(GL_LESS, 2, 0xffffffff);
   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
   glEnable(GL_POLYGON_OFFSET_FILL);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDisable(GL_LIGHTING); /* Force the 50% black. */
+  glDisable(GL_LIGHTING);  // Force the 50% black.
   glColor4f(0.0, 0.0, 0.0, 0.5);
 
   glPushMatrix();
-  /* Project the shadow. */
-  glMultMatrixf((GLfloat *)floorShadow);
+  glMultMatrixf((GLfloat *)floorShadow);  // Draw shadows
+
   drawModel();
+
   glPopMatrix();
   glDisable(GL_BLEND);
   glEnable(GL_LIGHTING);
