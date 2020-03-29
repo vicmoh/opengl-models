@@ -234,11 +234,6 @@ static void drawFloor(void) {
 }
 
 static void redraw(void) {
-  int start, end;
-
-  if (reportSpeed) {
-    start = glutGet(GLUT_ELAPSED_TIME);
-  }
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   // /* Reposition the light source. */
@@ -341,14 +336,12 @@ lightPosition[3] = 1.0;
 
   glPopMatrix();
 
-  if (reportSpeed) {
-    glFinish();
-    end = glutGet(GLUT_ELAPSED_TIME);
-    printf("Speed %.3g frames/sec (%d ms)\n", 1000.0 / (end - start),
-           end - start);
-  }
   glutSwapBuffers();
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                  Controls                                  */
+/* -------------------------------------------------------------------------- */
 
 /* ARGSUSED2 */
 static void mouse(int button, int state, int x, int y) {
@@ -405,60 +398,6 @@ static void idle(void) {
   glutPostRedisplay();
 }
 
-static void controlLights(int value) {
-  switch (value) {
-    case M_NONE:
-      return;
-    case M_MOTION:
-      animation = 1 - animation;
-      if (animation) {
-        glutIdleFunc(idle);
-      } else {
-        glutIdleFunc(NULL);
-      }
-      break;
-    case M_LIGHT:
-      lightSwitch = !lightSwitch;
-      if (lightSwitch) {
-        glEnable(GL_LIGHT0);
-      } else {
-        glDisable(GL_LIGHT0);
-      }
-      break;
-    case M_TEXTURE:
-      useTexture = !useTexture;
-      break;
-    case M_SHADOWS:
-      renderShadow = 1 - renderShadow;
-      break;
-    case M_REFLECTION:
-      renderReflection = 1 - renderReflection;
-      break;
-    case M_DINOSAUR:
-      renderDinosaur = 1 - renderDinosaur;
-      break;
-    case M_STENCIL_REFLECTION:
-      stencilReflection = 1 - stencilReflection;
-      break;
-    case M_STENCIL_SHADOW:
-      stencilShadow = 1 - stencilShadow;
-      break;
-    case M_OFFSET_SHADOW:
-      offsetShadow = 1 - offsetShadow;
-      break;
-    case M_POSITIONAL:
-      directionalLight = 0;
-      break;
-    case M_DIRECTIONAL:
-      directionalLight = 1;
-      break;
-    case M_PERFORMANCE:
-      reportSpeed = 1 - reportSpeed;
-      break;
-  }
-  glutPostRedisplay();
-}
-
 /* When not visible, stop animating.  Restart when visible again. */
 static void visible(int vis) {
   if (vis == GLUT_VISIBLE) {
@@ -482,16 +421,6 @@ static void key(unsigned char c, int x, int y) {
    performance reporting on. */
 /* ARGSUSED */
 static void special(int k, int x, int y) { glutPostRedisplay(); }
-
-static int supportsOneDotOne(void) {
-  const char *version;
-  int major, minor;
-
-  version = (char *)glGetString(GL_VERSION);
-  if (sscanf(version, "%d.%d", &major, &minor) == 2)
-    return major >= 1 && minor >= 1;
-  return 0; /* OpenGL version string malformed! */
-}
 
 /* -------------------------------------------------------------------------- */
 /*                                    Main                                    */
@@ -531,6 +460,7 @@ int main(int argc, char **argv) {
             0.0, 8.0, 0.0,   // center is at (0,0,0)
             0.0, 1.0, 0.);   // up is in positive Y direction
 
+  // Set the lighting
   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
   glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1);
@@ -538,9 +468,9 @@ int main(int argc, char **argv) {
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHTING);
 
-  /* Setup floor plane for projected shadow calculations. */
+  // Setup floor plane for projected shadow calculations.
   findPlane(floorPlane, floorVertices[1], floorVertices[2], floorVertices[3]);
 
   glutMainLoop();
-  return 0; /* ANSI C requires main to return int. */
+  return 0;
 }
