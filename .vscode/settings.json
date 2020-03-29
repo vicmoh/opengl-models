@@ -3,7 +3,13 @@
         "point.h": "c",
         "dynamic_string.h": "c",
         "model.h": "c",
-        "gl_setup.h": "c"
+        "gl_setup.h": "c",
+        "shadow.h": "c",
+        "splitter.h": "c"
     },
-    "C_Cpp.dimInactiveRegions": true
+    "C_Cpp.dimInactiveRegions": true,
+    "cSpell.words": [
+        "g",
+        "lfloat"
+    ]
 }
