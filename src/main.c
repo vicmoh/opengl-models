@@ -52,7 +52,7 @@ static void drawFace(int index) {
   Splitter *faceSplit = Model_parsedData->faceList->at[index];
   if (isStringEqual(faceSplit->at[0], "3")) glBegin(GL_TRIANGLES);
   if (isStringEqual(faceSplit->at[0], "4")) glBegin(GL_QUADS);
-  glColor3f(0, 0, 0);  // Shadow color
+  glColor3f(0.3, 0.3, 0.3);  // Shadow color
   double offsetY = fabs(*Model_parsedData->minY);
   for_in(next, faceSplit) {
     if (next == 0) continue;
