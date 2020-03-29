@@ -50,6 +50,7 @@ void drawFace(int index) {
   Splitter *faceSplit = Model_parsedData->faceList->at[index];
   if (isStringEqual(faceSplit->at[0], "3")) glBegin(GL_TRIANGLES);
   if (isStringEqual(faceSplit->at[0], "4")) glBegin(GL_QUADS);
+  double offsetY = fabs(*Model_parsedData->minY);
   for_in(next, faceSplit) {
     if (next == 0) continue;
     int curPos = atoi(faceSplit->at[next]);
@@ -59,9 +60,9 @@ void drawFace(int index) {
         fabs(*Model_parsedData->maxY) + fabs(*Model_parsedData->minY) +
         fabs(*Model_parsedData->maxZ) + fabs(*Model_parsedData->minZ);
     double avg = sumOfBoundary / 6;
-    double normalizer = 8 / avg;
+    double normalizer = 5 / avg;
     double x = curVertex->x * normalizer;
-    double y = curVertex->y * normalizer;
+    double y = (curVertex->y + offsetY + 1) * normalizer;
     double z = curVertex->z * normalizer;
     double distance = sqrt(x * x + y * y + z * z);
     glNormal3f(x / distance, y / distance, z / distance);
@@ -608,10 +609,6 @@ static int supportsOneDotOne(void) {
 
 int main(int argc, char **argv) {
   Model_parseModel(argc, argv);
-  floorVertices[0][1] = *Model_parsedData->minY;
-  floorVertices[1][1] = *Model_parsedData->minY;
-  floorVertices[2][1] = *Model_parsedData->minY;
-  floorVertices[3][1] = *Model_parsedData->minY;
 
   glutInit(&argc, argv);
 
