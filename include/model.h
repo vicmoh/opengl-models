@@ -17,6 +17,16 @@ typedef struct {
 } Model;
 
 /**
+ * The data that has been a parsed
+ */
+Model* Model_parsedData;
+
+/**
+ * Parse the model data.
+ */
+void Model_parseModel(int argc, char** argv);
+
+/**
  * Create a new empty model.
  */
 Model* __new_Model();

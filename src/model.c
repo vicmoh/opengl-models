@@ -1,5 +1,35 @@
 #include "model.h"
 
+void Model_parseModel(int argc, char** argv) {
+  const bool debug = true;
+  print("______________________________________________________");
+  print("Running script...\n");
+
+  // If no argument print the feedback.
+  if (argc == 0 || argv[1] == null || isStringEqual(argv[1], "")) {
+    print(
+        "\nNO ARGUMENT FOUND! PLEASE SPECIFY ARGUMENT. Please read the README "
+        "provided for more information.");
+    print("\nScript complete.\n");
+    exit(0);
+    return;
+  }
+
+  // Parse and print if it failed to parse.
+  Model_parsedData = new_Model(argv[1]);
+  if (Model_parsedData->hasError) {
+    print(
+        "\nCould not parse the file. Please make sure it is in the correct"
+        "format. File path might be incorrect or does not exist.");
+    print("\nScript complete.\n");
+    print("______________________________________________________");
+    Model_free(Model_parsedData);
+    exit(0);
+    return;
+  }
+  if (debug) Model_print(Model_parsedData);
+}
+
 Model* __new_Model() {
   Model* this = malloc(sizeof(Model));
   this->faceList = 0;
