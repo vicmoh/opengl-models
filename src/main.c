@@ -99,14 +99,14 @@ static void update() {
 enum PositionAttribute { X, Y, Z, W };
 
 // Variable controlling various rendering modes.
-static int directionalLight = 1;
-static GLfloat floorPlane[4];
-static GLfloat floorShadow[4][4];
+static int _directionalLight = 1;
+static GLfloat _floorPlane[4];
+static GLfloat _floorShadow[4][4];
 
 // Control for the camera angle and lighting.
-static float lightAngle = 0.0, lightHeight = 20;
-GLfloat angle = -150;  // in degrees
-GLfloat angle2 = 30;   // in degrees
+static float _lightAngle = 0.0, _lightHeight = 20;
+GLfloat _angle = -150;  // in degrees
+GLfloat _angleTwo = 30;    // in degrees
 
 // Motion and lights
 Point _motion = {.x = 0, .y = 0, .z = 0};
@@ -198,22 +198,22 @@ static void redraw() {
   glClearColor(1, 1, 1, 1);
 
   // Reposition of the light source.
-  _lightPosition[Y] = lightHeight;
+  _lightPosition[Y] = _lightHeight;
   if (SHOW_MOVING_LIGHT) {
-    _lightPosition[X] = 12 * cos(lightAngle);
-    _lightPosition[Z] = 12 * sin(lightAngle);
-    if (directionalLight)
+    _lightPosition[X] = 12 * cos(_lightAngle);
+    _lightPosition[Z] = 12 * sin(_lightAngle);
+    if (_directionalLight)
       _lightPosition[W] = 0.0;
     else
       _lightPosition[W] = 1.0;
   }
 
-  shadowMatrix(floorShadow, floorPlane, _lightPosition);
+  shadowMatrix(_floorShadow, _floorPlane, _lightPosition);
 
   glPushMatrix();
   // Perform scene rotations based on user mouse input.
-  glRotatef(angle2, 1.0, 0.0, 0.0);
-  glRotatef(angle, 0.0, 1.0, 0.0);
+  glRotatef(_angleTwo, 1.0, 0.0, 0.0);
+  glRotatef(_angle, 0.0, 1.0, 0.0);
 
   // New light source position
   glLightfv(GL_LIGHT0, GL_POSITION, _lightPosition);
@@ -258,7 +258,7 @@ static void redraw() {
   glColor4f(0.0, 0.0, 0.0, 0.5);
 
   glPushMatrix();
-  glMultMatrixf((GLfloat *)floorShadow);  // Draw shadows
+  glMultMatrixf((GLfloat *)_floorShadow);  // Draw shadows
 
   drawModel();
 
@@ -276,12 +276,12 @@ static void redraw() {
     glPushMatrix();
     glDisable(GL_LIGHTING);
     glColor3f(1.0, 1.0, 0.0);
-    if (directionalLight) {
+    if (_directionalLight) {
       /* Draw an arrowhead. */
       glDisable(GL_CULL_FACE);
       glTranslatef(_lightPosition[0], _lightPosition[1], _lightPosition[2]);
-      glRotatef(lightAngle * -180.0 / M_PI, 0, 1, 0);
-      glRotatef(atan(lightHeight / 12) * 180.0 / M_PI, 0, 0, 1);
+      glRotatef(_lightAngle * -180.0 / M_PI, 0, 1, 0);
+      glRotatef(atan(_lightHeight / 12) * 180.0 / M_PI, 0, 0, 1);
       glBegin(GL_TRIANGLE_FAN);
       glVertex3f(0, 0, 0);
       glVertex3f(2, 1, 1);
@@ -353,16 +353,16 @@ void specialControl(int key, int x, int y) {
 // Camera motion.
 static void motion(int x, int y) {
   if (_moving) {
-    angle = angle + (x - _motion.x);
-    angle2 = angle2 + (y - _motion.y);
+    _angle = _angle + (x - _motion.x);
+    _angleTwo = _angleTwo + (y - _motion.y);
     _motion.x = x;
     _motion.y = y;
     glutPostRedisplay();
   }
   if (SHOW_MOVING_LIGHT)
     if (_lightMoving) {
-      lightAngle += (x - _lightStartX) / 40.0;
-      lightHeight += (_lightStartY - y) / 20.0;
+      _lightAngle += (x - _lightStartX) / 40.0;
+      _lightHeight += (_lightStartY - y) / 20.0;
       _lightStartX = x;
       _lightStartY = y;
       glutPostRedisplay();
@@ -420,7 +420,7 @@ int main(int argc, char **argv) {
   glEnable(GL_LIGHTING);
 
   // Setup floor plane for projected shadow calculations.
-  findPlane(floorPlane, _floorVertices[1], _floorVertices[2],
+  findPlane(_floorPlane, _floorVertices[1], _floorVertices[2],
             _floorVertices[3]);
 
   glutMainLoop();

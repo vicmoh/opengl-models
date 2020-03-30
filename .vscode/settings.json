@@ -10,7 +10,9 @@
         "fstream": "c",
         "locale": "c",
         "optional": "c",
-        "sstream": "c"
+        "sstream": "c",
+        "complex": "c",
+        "*.tcc": "c"
     },
     "C_Cpp.dimInactiveRegions": true,
     "cSpell.words": [
