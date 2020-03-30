@@ -388,6 +388,7 @@ int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL |
                       GLUT_MULTISAMPLE);
+  glutInitWindowSize(720, 720);
   glutCreateWindow(argv[1]);
 
   // Init the open gl callbacks.
