@@ -43,8 +43,37 @@ const GLfloat _RED[] = {1.0, 0.0, 0.0, 1.0};
 const GLfloat _GREEN[] = {0.0, 1.0, 0.0, 1.0};
 const GLfloat _WHITE[] = {1.0, 1.0, 1.0, 1.0};
 
-// Points
-static Point _cameraPos = {.x = 0, .y = 0, .z = 0};
+// Attribute index for the array.
+enum PositionAttribute { X, Y, Z, W };
+
+// Variable controlling various rendering modes.
+static int _directionalLight = 1;
+static GLfloat _floorPlane[4];
+static GLfloat _floorShadow[4][4];
+
+// Control for the camera angle and lighting.
+static float _lightAngle = 0.0, _lightHeight = 20;
+GLfloat _angle = -150;   // in degrees
+GLfloat _angleTwo = 30;  // in degrees
+
+// Motion and lights
+Point _motion = {.x = 0, .y = 0, .z = 0};
+int _moving = 0;
+int _lightMoving = 0, _lightStartX = 0, _lightStartY = 0;
+
+static GLfloat _lightPosition[4];
+static GLfloat _lightColor[] = {1, 0.3, 0.3, 1.0};  // Red-tinted light.
+
+static GLfloat _floorVertices[4][3] = {
+    {-20.0, 0.0, 20.0},
+    {20.0, 0.0, 20.0},
+    {20.0, 0.0, -20.0},
+    {-20.0, 0.0, -20.0},
+};
+
+/* -------------------------------------------------------------------------- */
+/*                            Draw model functions                            */
+/* -------------------------------------------------------------------------- */
 
 /**
  * Draw the face from multiple vertex.
@@ -66,7 +95,7 @@ static void drawFace(int index) {
         fabs(*Model_parsedData->maxY) + fabs(*Model_parsedData->minY) +
         fabs(*Model_parsedData->maxZ) + fabs(*Model_parsedData->minZ);
     double avg = sumOfBoundary / 6;
-    double normalizer = 5 / avg;
+    double normalizer = (5 / avg);
     double x = curVertex->x * normalizer;
     double y = (curVertex->y + offsetY + 1) * normalizer;
     double z = curVertex->z * normalizer;
@@ -95,34 +124,6 @@ static void update() {
 /*                              Open GL Functions                             */
 /* -------------------------------------------------------------------------- */
 
-// Attribute index for the array.
-enum PositionAttribute { X, Y, Z, W };
-
-// Variable controlling various rendering modes.
-static int _directionalLight = 1;
-static GLfloat _floorPlane[4];
-static GLfloat _floorShadow[4][4];
-
-// Control for the camera angle and lighting.
-static float _lightAngle = 0.0, _lightHeight = 20;
-GLfloat _angle = -150;  // in degrees
-GLfloat _angleTwo = 30;    // in degrees
-
-// Motion and lights
-Point _motion = {.x = 0, .y = 0, .z = 0};
-int _moving = 0;
-int _lightMoving = 0, _lightStartX = 0, _lightStartY = 0;
-
-static GLfloat _lightPosition[4];
-static GLfloat _lightColor[] = {1, 0.3, 0.3, 1.0};  // Red-tinted light.
-
-static GLfloat _floorVertices[4][3] = {
-    {-20.0, 0.0, 20.0},
-    {20.0, 0.0, 20.0},
-    {20.0, 0.0, -20.0},
-    {-20.0, 0.0, -20.0},
-};
-
 static void printLightPosition() {
   print("x: ", _(_lightPosition[X]));
   print("y: ", _(_lightPosition[Y]));
@@ -131,8 +132,8 @@ static void printLightPosition() {
 }
 
 /* Create a matrix that will project the desired shadow. */
-static void shadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
-                         GLfloat lightpos[4]) {
+static void calcShadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
+                             GLfloat lightpos[4]) {
   // Find dot product between light position vector and ground plane normal.
   GLfloat dot = groundplane[X] * lightpos[X] + groundplane[Y] * lightpos[Y] +
                 groundplane[Z] * lightpos[Z] + groundplane[W] * lightpos[W];
@@ -177,7 +178,7 @@ static void findPlane(GLfloat plane[4], GLfloat v0[3], GLfloat v1[3],
   plane[3] = -(plane[0] * v0[X] + plane[1] * v0[Y] + plane[2] * v0[Z]);
 }
 
-/* Draw a floor (possibly textured). */
+// Draw a floor
 static void drawFloor(void) {
   glDisable(GL_LIGHTING);
   glBegin(GL_QUADS);
@@ -208,7 +209,7 @@ static void redraw() {
       _lightPosition[W] = 1.0;
   }
 
-  shadowMatrix(_floorShadow, _floorPlane, _lightPosition);
+  calcShadowMatrix(_floorShadow, _floorPlane, _lightPosition);
 
   glPushMatrix();
   // Perform scene rotations based on user mouse input.
@@ -335,6 +336,7 @@ static void mouseControl(int button, int state, int x, int y) {
     }
 }
 
+// Special control for sizing the model.
 void specialControl(int key, int x, int y) {
   const double CAMERA_MOVEMENT = 25;
   if (key == 'q' || key == 27) {
@@ -394,6 +396,7 @@ int main(int argc, char **argv) {
   glutMotionFunc(motion);
   glutKeyboardFunc(key);
   glutIdleFunc(update);
+  glutSpecialFunc(specialControl);
 
   // Init the modes and enable.
   glPolygonOffset(-2.0, -1.0);
