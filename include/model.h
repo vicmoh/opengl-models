@@ -8,6 +8,7 @@
 #include "splitter.h"
 
 typedef struct {
+  String fileName;
   int numOfVertices, numOfFaces;
   double *maxX, *maxY, *maxZ;
   double *minX, *minY, *minZ;

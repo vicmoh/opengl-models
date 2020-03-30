@@ -96,8 +96,11 @@ static void drawFace(int index) {
         fabs(*Model_parsedData->maxZ) + fabs(*Model_parsedData->minZ);
     double avg = sumOfBoundary / 6.0;
     double normalizer = (5.0 / avg);
+    double offsetMultiplyer =
+        fabs(*Model_parsedData->maxY) + fabs(*Model_parsedData->minY) / 2.0;
     double x = curVertex->x * normalizer;
-    double y = (double)(curVertex->y + offsetY + 0.01) * (normalizer);
+    double y =
+        (double)(curVertex->y + offsetY + offsetMultiplyer) * (normalizer);
     double z = curVertex->z * normalizer;
     double distance = sqrt(x * x + y * y + z * z);
     glNormal3f(x / distance, y / distance, z / distance);

@@ -43,6 +43,7 @@ Model* __new_Model() {
   this->maxY = null;
   this->minZ = null;
   this->maxZ = null;
+  this->fileName = $("");
   return this;
 }
 
@@ -77,6 +78,7 @@ Model* new_Model(String filePath) {
   // Initialize the data.
   FileReader* file = new_FileReader(filePath);
   Model* this = __new_Model();
+  $$(this->fileName, filePath);
   if (file == null) {
     this->hasError = true;
     return this;
@@ -158,7 +160,7 @@ void Model_free(Model* this) {
   Array_free(this->faceList);
   Array_free(this->vertices);
   dispose(this->minX, this->minY, this->minZ, this->minZ, this->maxY,
-          this->maxZ);
+          this->maxZ, this->fileName);
 }
 
 void Model_print(Model* this) {
@@ -185,6 +187,8 @@ void Model_print(Model* this) {
   print("maxX: ", _(*this->maxX, 6));
   print("maxY: ", _(*this->maxY, 6));
   print("maxZ: ", _(*this->maxZ, 6));
+  print("______________________________________________");
+  print("File: ", this->fileName);
 
   // Free garbage mem
   Garbage_sweep(gcStr);
