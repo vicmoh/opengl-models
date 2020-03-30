@@ -10,7 +10,6 @@
 // My libraries
 #include "dynamic_string.h"
 #include "file_reader.h"
-#include "gl_setup.h"
 #include "model.h"
 #include "point.h"
 
@@ -89,9 +88,7 @@ static void update() {
 /* -------------------------------------------------------------------------- */
 
 // Variable controlling various rendering modes.
-static int animation = 1;
 static int directionalLight = 1;
-
 static GLfloat floorPlane[4];
 static GLfloat floorShadow[4][4];
 
@@ -117,15 +114,15 @@ enum { X, Y, Z, W };
 enum { A, B, C, D };
 
 static void printLightPosition() {
-  print("x: ", _(lightPosition[0]));
-  print("y: ", _(lightPosition[1]));
-  print("z: ", _(lightPosition[2]));
-  print("light: ", _(lightPosition[3]));
+  print("x: ", _(lightPosition[X]));
+  print("y: ", _(lightPosition[Y]));
+  print("z: ", _(lightPosition[Z]));
+  print("light: ", _(lightPosition[W]));
 }
 
 /* Create a matrix that will project the desired shadow. */
-void shadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
-                  GLfloat lightpos[4]) {
+static void shadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
+                         GLfloat lightpos[4]) {
   // Find dot product between light position vector and ground plane normal.
   GLfloat dot = groundplane[X] * lightpos[X] + groundplane[Y] * lightpos[Y] +
                 groundplane[Z] * lightpos[Z] + groundplane[W] * lightpos[W];
@@ -152,7 +149,8 @@ void shadowMatrix(GLfloat shadowMat[4][4], GLfloat groundplane[4],
 }
 
 /* Find the plane equation given 3 points. */
-void findPlane(GLfloat plane[4], GLfloat v0[3], GLfloat v1[3], GLfloat v2[3]) {
+static void findPlane(GLfloat plane[4], GLfloat v0[3], GLfloat v1[3],
+                      GLfloat v2[3]) {
   GLfloat vec0[3], vec1[3];
   /* Need 2 vectors to find cross product. */
   vec0[X] = v1[X] - v0[X];
@@ -174,13 +172,13 @@ static void drawFloor(void) {
   glDisable(GL_LIGHTING);
   glBegin(GL_QUADS);
   glTexCoord2f(0.0, 0.0);
-  glVertex3fv(floorVertices[0]);
+  glVertex3fv(floorVertices[X]);
   glTexCoord2f(0.0, 16.0);
-  glVertex3fv(floorVertices[1]);
+  glVertex3fv(floorVertices[Y]);
   glTexCoord2f(16.0, 16.0);
-  glVertex3fv(floorVertices[2]);
+  glVertex3fv(floorVertices[Z]);
   glTexCoord2f(16.0, 0.0);
-  glVertex3fv(floorVertices[3]);
+  glVertex3fv(floorVertices[W]);
   glEnd();
   glEnable(GL_LIGHTING);
 }
@@ -190,14 +188,15 @@ static void redraw() {
   glClearColor(1, 1, 1, 1);
 
   // Reposition of the light source.
-  lightPosition[1] = lightHeight;
+  lightPosition[Y] = lightHeight;
+  lightPosition[X] = 5;
   if (SHOW_MOVING_LIGHT) {
-    lightPosition[0] = 12 * cos(lightAngle);
-    lightPosition[2] = 12 * sin(lightAngle);
+    lightPosition[X] = 12 * cos(lightAngle);
+    lightPosition[Z] = 12 * sin(lightAngle);
     if (directionalLight)
-      lightPosition[3] = 0.0;
+      lightPosition[W] = 0.0;
     else
-      lightPosition[3] = 1.0;
+      lightPosition[W] = 1.0;
   }
 
   shadowMatrix(floorShadow, floorPlane, lightPosition);
