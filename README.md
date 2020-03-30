@@ -20,7 +20,8 @@ resize the window which will re-centered the model.
 
 ## How to run
 
-* For example, by typing `make FILE="./assets/dolphins.ply"`.
+* For example, by typing `make FILE="./assets/dolphins.ply"` or
+`./a4 "./assets/dolphins.ply"`.
 It will run the the program with the `PLY` file that containing
 the vertices and faces of the model.
 * `FILE` must contain an argument. If no argument is passed
