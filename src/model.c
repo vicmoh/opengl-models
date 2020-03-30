@@ -179,12 +179,12 @@ void Model_print(Model* this) {
 
   // Print boundary
   print("______________________________________________");
-  print("minX: ", _(*this->minX));
-  print("minY: ", _(*this->minY));
-  print("minZ: ", _(*this->minZ));
-  print("maxX: ", _(*this->maxX));
-  print("maxY: ", _(*this->maxY));
-  print("maxZ: ", _(*this->maxZ));
+  print("minX: ", _(*this->minX, 6));
+  print("minY: ", _(*this->minY, 6));
+  print("minZ: ", _(*this->minZ, 6));
+  print("maxX: ", _(*this->maxX, 6));
+  print("maxY: ", _(*this->maxY, 6));
+  print("maxZ: ", _(*this->maxZ, 6));
 
   // Free garbage mem
   Garbage_sweep(gcStr);

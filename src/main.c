@@ -94,10 +94,10 @@ static void drawFace(int index) {
         fabs(*Model_parsedData->maxX) + fabs(*Model_parsedData->minX) +
         fabs(*Model_parsedData->maxY) + fabs(*Model_parsedData->minY) +
         fabs(*Model_parsedData->maxZ) + fabs(*Model_parsedData->minZ);
-    double avg = sumOfBoundary / 6;
-    double normalizer = (5 / avg);
+    double avg = sumOfBoundary / 6.0;
+    double normalizer = (5.0 / avg);
     double x = curVertex->x * normalizer;
-    double y = (curVertex->y + offsetY + 1) * normalizer;
+    double y = (double)(curVertex->y + offsetY + 0.01) * (normalizer);
     double z = curVertex->z * normalizer;
     double distance = sqrt(x * x + y * y + z * z);
     glNormal3f(x / distance, y / distance, z / distance);
@@ -125,9 +125,9 @@ static void update() {
 /* -------------------------------------------------------------------------- */
 
 static void printLightPosition() {
-  print("x: ", _(_lightPosition[X]));
-  print("y: ", _(_lightPosition[Y]));
-  print("z: ", _(_lightPosition[Z]));
+  print("x: ", _(_lightPosition[X], 4));
+  print("y: ", _(_lightPosition[Y], 4));
+  print("z: ", _(_lightPosition[Z], 4));
   print("light: ", _(_lightPosition[W]));
 }
 
