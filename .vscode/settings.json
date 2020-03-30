@@ -5,7 +5,12 @@
         "model.h": "c",
         "gl_setup.h": "c",
         "shadow.h": "c",
-        "splitter.h": "c"
+        "splitter.h": "c",
+        "algorithm": "c",
+        "fstream": "c",
+        "locale": "c",
+        "optional": "c",
+        "sstream": "c"
     },
     "C_Cpp.dimInactiveRegions": true,
     "cSpell.words": [

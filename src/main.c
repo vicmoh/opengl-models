@@ -1,3 +1,11 @@
+/**
+ * @author: Vicky Mohammad
+ * @file This pogram parse the PLY model and creates the model.
+ * using the model.
+ * Reference:
+ * https://www.opengl.org/archives/resources/code/samples/mjktips/TexShadowReflectLight.html
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,10 +38,10 @@ static int _textures = 0;
 static GLuint _textureID[1];
 
 // Colors
-const GLfloat BLUE[] = {0.0, 0.0, 1.0, 1.0};
-const GLfloat RED[] = {1.0, 0.0, 0.0, 1.0};
-const GLfloat GREEN[] = {0.0, 1.0, 0.0, 1.0};
-const GLfloat WHITE[] = {1.0, 1.0, 1.0, 1.0};
+const GLfloat _BLUE[] = {0.0, 0.0, 1.0, 1.0};
+const GLfloat _RED[] = {1.0, 0.0, 0.0, 1.0};
+const GLfloat _GREEN[] = {0.0, 1.0, 0.0, 1.0};
+const GLfloat _WHITE[] = {1.0, 1.0, 1.0, 1.0};
 
 // Points
 static Point _cameraPos = {.x = 0, .y = 0, .z = 0};
@@ -87,6 +95,9 @@ static void update() {
 /*                              Open GL Functions                             */
 /* -------------------------------------------------------------------------- */
 
+// Attribute index for the array.
+enum PositionAttribute { X, Y, Z, W };
+
 // Variable controlling various rendering modes.
 static int directionalLight = 1;
 static GLfloat floorPlane[4];
@@ -97,27 +108,26 @@ static float lightAngle = 0.0, lightHeight = 20;
 GLfloat angle = -150;  // in degrees
 GLfloat angle2 = 30;   // in degrees
 
-int moving = 0, startx = 0, starty;
-int lightMoving = 0, lightStartX = 0, lightStartY = 0;
+// Motion and lights
+Point _motion = {.x = 0, .y = 0, .z = 0};
+int _moving = 0;
+int _lightMoving = 0, _lightStartX = 0, _lightStartY = 0;
 
-static GLfloat lightPosition[4];
-static GLfloat lightColor[] = {1, 0.3, 0.3, 1.0};  // Red-tinted light.
+static GLfloat _lightPosition[4];
+static GLfloat _lightColor[] = {1, 0.3, 0.3, 1.0};  // Red-tinted light.
 
-static GLfloat floorVertices[4][3] = {
+static GLfloat _floorVertices[4][3] = {
     {-20.0, 0.0, 20.0},
     {20.0, 0.0, 20.0},
     {20.0, 0.0, -20.0},
     {-20.0, 0.0, -20.0},
 };
 
-enum { X, Y, Z, W };
-enum { A, B, C, D };
-
 static void printLightPosition() {
-  print("x: ", _(lightPosition[X]));
-  print("y: ", _(lightPosition[Y]));
-  print("z: ", _(lightPosition[Z]));
-  print("light: ", _(lightPosition[W]));
+  print("x: ", _(_lightPosition[X]));
+  print("y: ", _(_lightPosition[Y]));
+  print("z: ", _(_lightPosition[Z]));
+  print("light: ", _(_lightPosition[W]));
 }
 
 /* Create a matrix that will project the desired shadow. */
@@ -161,10 +171,10 @@ static void findPlane(GLfloat plane[4], GLfloat v0[3], GLfloat v1[3],
   vec1[Y] = v2[Y] - v0[Y];
   vec1[Z] = v2[Z] - v0[Z];
   /* find cross product to get A, B, and C of plane equation */
-  plane[A] = vec0[Y] * vec1[Z] - vec0[Z] * vec1[Y];
-  plane[B] = -(vec0[X] * vec1[Z] - vec0[Z] * vec1[X]);
-  plane[C] = vec0[X] * vec1[Y] - vec0[Y] * vec1[X];
-  plane[D] = -(plane[A] * v0[X] + plane[B] * v0[Y] + plane[C] * v0[Z]);
+  plane[0] = vec0[Y] * vec1[Z] - vec0[Z] * vec1[Y];
+  plane[1] = -(vec0[X] * vec1[Z] - vec0[Z] * vec1[X]);
+  plane[2] = vec0[X] * vec1[Y] - vec0[Y] * vec1[X];
+  plane[3] = -(plane[0] * v0[X] + plane[1] * v0[Y] + plane[2] * v0[Z]);
 }
 
 /* Draw a floor (possibly textured). */
@@ -172,13 +182,13 @@ static void drawFloor(void) {
   glDisable(GL_LIGHTING);
   glBegin(GL_QUADS);
   glTexCoord2f(0.0, 0.0);
-  glVertex3fv(floorVertices[X]);
+  glVertex3fv(_floorVertices[X]);
   glTexCoord2f(0.0, 16.0);
-  glVertex3fv(floorVertices[Y]);
+  glVertex3fv(_floorVertices[Y]);
   glTexCoord2f(16.0, 16.0);
-  glVertex3fv(floorVertices[Z]);
+  glVertex3fv(_floorVertices[Z]);
   glTexCoord2f(16.0, 0.0);
-  glVertex3fv(floorVertices[W]);
+  glVertex3fv(_floorVertices[W]);
   glEnd();
   glEnable(GL_LIGHTING);
 }
@@ -188,26 +198,25 @@ static void redraw() {
   glClearColor(1, 1, 1, 1);
 
   // Reposition of the light source.
-  lightPosition[Y] = lightHeight;
-  lightPosition[X] = 5;
+  _lightPosition[Y] = lightHeight;
   if (SHOW_MOVING_LIGHT) {
-    lightPosition[X] = 12 * cos(lightAngle);
-    lightPosition[Z] = 12 * sin(lightAngle);
+    _lightPosition[X] = 12 * cos(lightAngle);
+    _lightPosition[Z] = 12 * sin(lightAngle);
     if (directionalLight)
-      lightPosition[W] = 0.0;
+      _lightPosition[W] = 0.0;
     else
-      lightPosition[W] = 1.0;
+      _lightPosition[W] = 1.0;
   }
 
-  shadowMatrix(floorShadow, floorPlane, lightPosition);
+  shadowMatrix(floorShadow, floorPlane, _lightPosition);
 
   glPushMatrix();
-  /* Perform scene rotations based on user mouse input. */
+  // Perform scene rotations based on user mouse input.
   glRotatef(angle2, 1.0, 0.0, 0.0);
   glRotatef(angle, 0.0, 1.0, 0.0);
 
-  /* Tell GL new light source position. */
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+  // New light source position
+  glLightfv(GL_LIGHT0, GL_POSITION, _lightPosition);
 
   /* Back face culling will get used to only draw either the top or the
     bottom floor.  This let's us get a floor with two distinct
@@ -270,7 +279,7 @@ static void redraw() {
     if (directionalLight) {
       /* Draw an arrowhead. */
       glDisable(GL_CULL_FACE);
-      glTranslatef(lightPosition[0], lightPosition[1], lightPosition[2]);
+      glTranslatef(_lightPosition[0], _lightPosition[1], _lightPosition[2]);
       glRotatef(lightAngle * -180.0 / M_PI, 0, 1, 0);
       glRotatef(atan(lightHeight / 12) * 180.0 / M_PI, 0, 0, 1);
       glBegin(GL_TRIANGLE_FAN);
@@ -290,7 +299,7 @@ static void redraw() {
       glEnable(GL_CULL_FACE);
     } else {
       // Draw a yellow ball at the light source.
-      glTranslatef(lightPosition[0], lightPosition[1], lightPosition[2]);
+      glTranslatef(_lightPosition[0], _lightPosition[1], _lightPosition[2]);
       glutSolidSphere(1.0, 5, 5);
     }
     glEnable(GL_LIGHTING);
@@ -306,41 +315,56 @@ static void redraw() {
 /* -------------------------------------------------------------------------- */
 
 // Mouse control.
-static void mouse(int button, int state, int x, int y) {
+static void mouseControl(int button, int state, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
     if (state == GLUT_DOWN) {
-      moving = 1;
-      startx = x;
-      starty = y;
+      _moving = 1;
+      _motion.x = x;
+      _motion.y = y;
     }
-    if (state == GLUT_UP) moving = 0;
+    if (state == GLUT_UP) _moving = 0;
   }
   if (SHOW_MOVING_LIGHT)
     if (button == GLUT_MIDDLE_BUTTON) {
       if (state == GLUT_DOWN) {
-        lightMoving = 1;
-        lightStartX = x;
-        lightStartY = y;
+        _lightMoving = 1;
+        _lightStartX = x;
+        _lightStartY = y;
       }
-      if (state == GLUT_UP) lightMoving = 0;
+      if (state == GLUT_UP) _lightMoving = 0;
     }
+}
+
+void specialControl(int key, int x, int y) {
+  const double CAMERA_MOVEMENT = 25;
+  if (key == 'q' || key == 27) {
+    exit(0);
+  } else if (key == 'w' || key == GLUT_KEY_UP) {
+    _motion.z += CAMERA_MOVEMENT;
+    redraw();
+    printf("w key is pressed, y=%f.\n", _motion.z);
+  } else if (key == 's' || key == GLUT_KEY_DOWN) {
+    _motion.z -= CAMERA_MOVEMENT;
+    redraw();
+    printf("s key is pressed, y=%f.\n", _motion.z);
+  }
 }
 
 // Camera motion.
 static void motion(int x, int y) {
-  if (moving) {
-    angle = angle + (x - startx);
-    angle2 = angle2 + (y - starty);
-    startx = x;
-    starty = y;
+  if (_moving) {
+    angle = angle + (x - _motion.x);
+    angle2 = angle2 + (y - _motion.y);
+    _motion.x = x;
+    _motion.y = y;
     glutPostRedisplay();
   }
   if (SHOW_MOVING_LIGHT)
-    if (lightMoving) {
-      lightAngle += (x - lightStartX) / 40.0;
-      lightHeight += (lightStartY - y) / 20.0;
-      lightStartX = x;
-      lightStartY = y;
+    if (_lightMoving) {
+      lightAngle += (x - _lightStartX) / 40.0;
+      lightHeight += (_lightStartY - y) / 20.0;
+      _lightStartX = x;
+      _lightStartY = y;
       glutPostRedisplay();
     }
 }
@@ -366,7 +390,7 @@ int main(int argc, char **argv) {
 
   // Init the open gl callbacks.
   glutDisplayFunc(redraw);
-  glutMouseFunc(mouse);
+  glutMouseFunc(mouseControl);
   glutMotionFunc(motion);
   glutKeyboardFunc(key);
   glutIdleFunc(update);
@@ -389,14 +413,15 @@ int main(int argc, char **argv) {
 
   // Set the lighting
   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, _lightColor);
   glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1);
   glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05);
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHTING);
 
   // Setup floor plane for projected shadow calculations.
-  findPlane(floorPlane, floorVertices[1], floorVertices[2], floorVertices[3]);
+  findPlane(floorPlane, _floorVertices[1], _floorVertices[2],
+            _floorVertices[3]);
 
   glutMainLoop();
   return 0;
